@@ -91,7 +91,7 @@ HACS Installation (not working with latest)
 
 
 4. Add this repository URL:
-🔗 https://github.com/Vansmak/mediarr_card
+🔗 https://github.com/Vansmak/mediarr-card
 
 Select Category: Lovelace) Dashboard 
 
