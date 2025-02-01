@@ -1,11 +1,11 @@
 // main-card.js
-import { PlexSection } from './sections/plex-section.js';
-import { JellyfinSection } from './sections/jellyfin-section.js';
-import { SonarrSection } from './sections/sonarr-section.js';
-import { RadarrSection } from './sections/radarr-section.js';
-import { SeerSection } from './sections/seer-section.js';
-import { TMDBSection } from './sections/tmdb-section.js';
-import { TraktSection } from './sections/trakt-section.js';
+import { PlexSection } from './plex-section.js';
+import { JellyfinSection } from './jellyfin-section.js';
+import { SonarrSection } from './sonarr-section.js';
+import { RadarrSection } from './radarr-section.js';
+import { SeerSection } from './seer-section.js';
+import { TMDBSection } from './tmdb-section.js';
+import { TraktSection } from './trakt-section.js';
 import { styles } from './styles.js';
 
 class MediarrCard extends HTMLElement {
