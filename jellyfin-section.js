@@ -13,6 +13,12 @@ export class JellyfinSection extends BaseSection {
     cardInstance.background.style.backgroundImage = `url('${item.fanart}')`;
     cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
 
+    // Check for empty state and clear the info if the item has a default title
+    if (item.title_default) {
+      cardInstance.info.innerHTML = '';
+      return;
+    }
+
     const addedDate = new Date(item.added || Date.now()).toLocaleDateString();
     const runtime = item.runtime ? `${item.runtime} min` : '';
     const subtitle = item.episode ? `${item.number || ''} - ${item.episode || ''}` : '';
@@ -25,6 +31,16 @@ export class JellyfinSection extends BaseSection {
   }
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    // Handle empty state
+    if (item.title_default) {
+      return `
+        <div class="empty-section-content">
+          <div class="empty-message">No recently added media</div>
+        </div>
+      `;
+    }
+
+    // Use original media item layout
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -35,5 +51,5 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
-  // Remove _formatImageUrl method entirely since we're using direct URLs
+  
 }

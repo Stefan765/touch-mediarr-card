@@ -158,7 +158,7 @@ class MediarrCard extends HTMLElement {
           <div class="client-modal hidden">
             <div class="client-modal-content">
               <div class="client-modal-header">
-                <div class="client-modal-title">Select Plex Client</div>
+                <div class="client-modal-title">Select Client</div>
                 <ha-icon class="client-modal-close" icon="mdi:close"></ha-icon>
               </div>
               <div class="client-list"></div>

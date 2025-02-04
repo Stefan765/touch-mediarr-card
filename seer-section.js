@@ -1,4 +1,4 @@
-// sections/seer-section.js
+// seer-section.js
 import { BaseSection } from './base-section.js';
 
 export class SeerSection extends BaseSection {
@@ -6,8 +6,38 @@ export class SeerSection extends BaseSection {
     super('seer', 'Media Requests');
   }
 
+  updateInfo(cardInstance, item) {
+    if (!item) return;
+
+    // Update backgrounds using parent class functionality
+    super.updateInfo(cardInstance, item);
+
+    // If it's an empty state item, clear the info
+    if (item.title_default) {
+      cardInstance.info.innerHTML = '';
+      return;
+    }
+
+    // Otherwise show the request details
+    cardInstance.info.innerHTML = `
+      <div class="title">${item.title}</div>
+      <div class="details">
+        ${item.requested_by} - ${item.requested_date}
+      </div>
+    `;
+  }
+
   generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Make sure status exists and is a string
+    // Handle empty state
+    if (item.title_default) {
+      return `
+        <div class="empty-section-content">
+          <div class="empty-message">No pending media requests</div>
+        </div>
+      `;
+    }
+
+    // Use original media item layout with status
     const status = String(item.status || 'unknown');
     const statusClass = this._getStatusClass(status);
     
@@ -21,20 +51,6 @@ export class SeerSection extends BaseSection {
       </div>
     `;
   }
-
-  updateInfo(cardInstance, item) {
-    if (!item) return;
-
-    cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
-
-    cardInstance.info.innerHTML = `
-        <div class="title">${item.title}</div>
-        <div class="details">
-          ${item.requested_by} - ${item.requested_date}
-        </div>
-      `;
-    }
 
   _getStatusClass(status) {
     const statusMap = {

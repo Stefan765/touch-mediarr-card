@@ -12,6 +12,12 @@ export class SonarrSection extends BaseSection {
     cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
     cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
 
+    // Check for empty state and clear the info if the item has a default title
+    if (item.title_default) {
+      cardInstance.info.innerHTML = '';
+      return;
+    }
+
     let airDate = '';
     if (item.release && item.release !== 'Unknown') {
       const date = new Date(item.release);
@@ -20,6 +26,7 @@ export class SonarrSection extends BaseSection {
       }
     }
 
+    // Show the item details
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}</div>
       <div class="details">${item.number || ''} - ${item.episode || ''}</div>
@@ -30,6 +37,16 @@ export class SonarrSection extends BaseSection {
   }
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    // Handle empty state
+    if (item.title_default) {
+      return `
+        <div class="empty-section-content">
+          <div class="empty-message">No upcoming shows</div>
+        </div>
+      `;
+    }
+
+    // Use original media item layout
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
