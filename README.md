@@ -47,14 +47,36 @@ Screenshots
 ![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
 
 **Installation 
-Manual Installation (hacs can be a pia)
+HACS Installation 
+
+1. Open HACS
+
+
+2. Go to "Frontend"
+
+
+3. Click the three dots (⋮) → "Custom repositories"
+
+
+4. Add this repository URL:
+🔗 https://github.com/Vansmak/mediarr-card
+
+Select Category: Lovelace) Dashboard 
+
+5. Click "Add"
+
+6. Find and install "Mediarr card" from HACS
+
+7. Restart Home Assistant
+
+Manual Installation 
 
 1. Download the latest release from this repository.
 
 2. Copy main.js, styles js and /sections folder  into:
 
 /config/www/community/mediarr-card/
-│── main.js
+│── mediarr-card.js
 │── styles.js
 │── sections/
 │   ├── section1.js
@@ -78,30 +100,6 @@ Select "JavaScript Module"
 Click "Create"
 
 4. Restart Home Assistant
-
-HACS Installation (not working with latest)
-
-1. Open HACS
-
-
-2. Go to "Frontend"
-
-
-3. Click the three dots (⋮) → "Custom repositories"
-
-
-4. Add this repository URL:
-🔗 https://github.com/Vansmak/mediarr-card
-
-Select Category: Lovelace) Dashboard 
-
-5. Click "Add"
-
-6. Find and install "Mediarr card" from HACS
-
-7. Restart Home Assistant
-
-
 
 Configuration
 
