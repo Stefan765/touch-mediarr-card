@@ -18,14 +18,14 @@ export class PlexSection extends BaseSection {
       return;
     }
 
-    const addedDate = item.release !== 'Unknown' ? 
-      new Date(item.release).toLocaleDateString() : 
-      new Date(item.added || Date.now()).toLocaleDateString();
+    const releaseDate = item.release === 'TBA' ? 
+      'TBA' : 
+      (item.release ? new Date(item.release).toLocaleDateString() : 'TBA');
 
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
       ${item.number ? `<div class="details">${item.number}${item.episode ? ` - ${item.episode}` : ''}</div>` : ''}
-      <div class="metadata">Added: ${addedDate}</div>
+      <div class="metadata">Released: ${releaseDate}</div>
     `;
   }
 

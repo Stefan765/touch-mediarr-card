@@ -19,14 +19,14 @@ export class JellyfinSection extends BaseSection {
       return;
     }
 
-    const addedDate = new Date(item.added || Date.now()).toLocaleDateString();
+    const addedDate = item.release ? new Date(item.release).toLocaleDateString() : 'Unknown';
     const runtime = item.runtime ? `${item.runtime} min` : '';
     const subtitle = item.episode ? `${item.number || ''} - ${item.episode || ''}` : '';
 
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
       <div class="details">${subtitle}</div>
-      <div class="metadata">Added: ${addedDate}${runtime ? ` | ${runtime}` : ''}</div>
+      <div class="metadata">Released: ${addedDate}${runtime ? ` | ${runtime}` : ''}</div>
     `;
   }
 

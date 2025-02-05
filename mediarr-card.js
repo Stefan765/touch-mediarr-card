@@ -151,8 +151,34 @@ class MediarrCard extends HTMLElement {
   }
 
   initializeCard(hass) {
-    this.innerHTML = `
-      <ha-card>
+    // Get the order of configuration keys from the user's configuration
+    const configKeys = Object.keys(this.config)
+      .filter(key => 
+        key.endsWith('_entity') || 
+        key.startsWith('tmdb_') && key !== 'tmdb_url'
+      );
+
+    // Build sections in the order specified by the configuration
+    const orderedSections = configKeys.reduce((sections, key) => {
+      let sectionKey = null;
+      
+      if (key === 'plex_entity') sectionKey = 'plex';
+      else if (key === 'jellyfin_entity') sectionKey = 'jellyfin';
+      else if (key === 'sonarr_entity') sectionKey = 'sonarr';
+      else if (key === 'radarr_entity') sectionKey = 'radarr';
+      else if (key === 'seer_entity') sectionKey = 'seer';
+      else if (key === 'trakt_entity') sectionKey = 'trakt';
+      else if (key.startsWith('tmdb_')) sectionKey = 'tmdb';
+
+      if (sectionKey && !sections.includes(sectionKey)) {
+        sections.push(sectionKey);
+      }
+
+      return sections;
+    }, []);
+
+    this.innerHTML = 
+      `<ha-card>
         <div class="card-background"></div>
         <div class="card-content">
           <div class="client-modal hidden">
@@ -186,20 +212,26 @@ class MediarrCard extends HTMLElement {
             </div>
           </div>
           
-          ${Object.entries(this.sections)
-            .filter(([key]) => {
+          ${orderedSections
+            .map(key => {
+              const section = this.sections[key];
+              
               if (key === 'tmdb') {
-                return this.sections.tmdb.sections.some(section => 
-                  this.config[section.entityKey]
-                );
+                return section.sections
+                  .filter(tmdbSection => 
+                    this.config[tmdbSection.entityKey]
+                  )
+                  .map(tmdbSection => 
+                    section.generateTemplate(this.config, tmdbSection.entityKey)
+                  )
+                  .join('');
               }
-              return this.config[`${key}_entity`];
+              
+              return section.generateTemplate(this.config);
             })
-            .map(([key, section]) => section.generateTemplate(this.config))
             .join('')}
         </div>
-      </ha-card>
-    `;
+      </ha-card>`;
 
     // Initialize elements
     this.content = this.querySelector('.media-content');
