@@ -29,7 +29,7 @@ Other Arrs can easily be added
 
 *Media Discovery
 
-Overseerr / Jellyseer: View     media requests
+Overseerr / Jellyseer: View     media requests with status and requestor
 
 Trakt: Browse popular TV shows and movies
 
@@ -109,7 +109,7 @@ Step 1: Install and configure the Mediarr Server sensors
 
 Step 2: Add the Card to Lovelace
 
-Add the following YAML to your dashboard:
+Add the following YAML to your dashboard:  the order will be the same as you see in the card
 ```
 type: custom:mediarr-card #underscore
 plex_entity: sensor.plex_mediarr
