@@ -1,5 +1,5 @@
 Mediarr for Home Assistant (Inspired by Upcoming Media Card)
-A comprehensive media management card for Home Assistant that brings together your media servers, management tools, and discovery services in one place.
+A comprehensive visual of the state of your media management for Home Assistant that brings together your media servers, management tools, and discovery services in one place.
 
 Support This Project
 If you find this project helpful, please consider supporting it. Your contributions help maintain and improve the project. Any support is greatly appreciated! ❤️ https://buymeacoffee.com/vansmak Thank you for your support!
@@ -17,7 +17,7 @@ Plex: View recently added content
 
 Jellyfin: View recently added content
 
-Emby: (Coming soon!)
+Emby: (may come soon!)
 
 *Media Management
 
@@ -32,17 +32,36 @@ Other Arrs can easily be added
 Overseerr / Jellyseer: View     media requests with status and requestor
 
 Trakt: Browse popular TV shows and movies
-
+   - may be adding trakt calendar lists, i make no promises.  I do not use trakt
 TMDB: Explore trending content (configurable for TV, movies, or both)
+ 
+*Media Player State (may remove)  currently if you and a media_player.jelly_or_plex it will show a small overlay of what is playing
+ as an alternative you could leave out the entity and do something like 
+ ```
+ type: custom:stack-in-card
+ cards:
+   - type: conditional
+     conditions:
+       - condition: state
+         entity: media_player.entity
+         state_not: "off"
+     card:
+       type: custom:mushroom-media-player-card
+       entity: media_player.entity
+       use_media_info: true
+       primary_info: none
+       secondary_info: none
+       icon_type: none
+       media_controls:
+         - play_pause_stop
+   - type: custom:mediarr-card
+     jellyfin_entity: sensor.jellyfin_mediarr
+     sonarr_entity: sensor.sonarr_mediarr
+     seer_entity: sensor.seer_mediarr
+     radarr_entity: sensor.radarr_mediarr
+```
 
-*Media Player State
 
-Displays what’s currently playing on Plex / Jellyfin (Click-to-play coming soon!)
-
-Screenshots
-![Screenshot 2025-01-31 at 14-43-03 mediarr – Home Assistant](https://github.com/user-attachments/assets/ce041d96-d9a1-421b-8d34-2dc5194c2034)
-
- 🎥 Demo Video(https://youtu.be/6Ik-8KVS--w)
 
 ![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
 
@@ -111,7 +130,8 @@ Step 2: Add the Card to Lovelace
 
 Add the following YAML to your dashboard:  the order will be the same as you see in the card
 ```
-type: custom:mediarr-card #underscore
+type: custom:mediarr-card 
+media_player_entity: media_player.entity # optional for visual of whats currently playing
 plex_entity: sensor.plex_mediarr
 jellyfin_entity: sensor.jellyfin_mediarr
 sonarr_entity: sensor.sonarr_mediarr
@@ -134,10 +154,63 @@ media_player_entity: media_player.your_plex_player
 **Options
 
 Sensor Configuration
+```yaml
+sensor:
+  - platform: mediarr
+    plex:  # Optional
+      host: localhost
+      port: xxxxxx
+      token: your_token
+
+    jellyfin:  # Optional
+      host: localhost
+      port: xxxxxx
+      token: your_api_key 
+      max_items: 10
+      tmdb_api_key: "your_tmdb_api_key"
+
+    seer: # Optional
+      url: localhost
+      api_key: your_api_key
+      max_items: 10
+      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+
+    sonarr:  # Optional
+      url: http://localhost:8989
+      api_key: your_sonarr_api_key
+      max_items: 10
+      days_to_check: 60
+      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+
+    radarr:  # Optional
+      url: http://localhost:7878
+      api_key: your_radarr_api_key
+      max_items: 10
+      days_to_check: 60 #breaking change
+      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+    
+    trakt:  # Optional
+      client_id: "your_client_id"
+      client_secret: "your_client_secret"
+      tmdb_api_key: "your_tmdb_api_key"  # Required for posters
+      trending_type: both  # Options: movies, shows, both
+      max_items: 10
+     
+    
+    tmdb:  # Optional
+      api_key: "your_api_key"
+      trending_type: all  # Options: movie, tv, all
+      max_items: 10
+      trending: true          # Default endpoint
+      now_playing: true       # Optional
+      upcoming: true          # Optional
+      on_air: true            # Optional
+      airing_today: false     # Optional
+```
 
 max_items: Number of items to display (default: 10)
 
-days_to_check: Days to look ahead for upcoming content (Sonarr only, default: 60)
+days_to_check: Days to look ahead for upcoming content (Sonarr and Radarr only, default: 60)
 
 trending_type: Content type to display for Trakt and TMDB
 
@@ -154,7 +227,10 @@ Plex
 
 🔗 Find your Plex token
 
-Sonarr / Radarr
+Jellyfin
+ Create an api-key in jellyfin
+
+Sonarr / Radarr / Seer
 
 1. Go to Settings → General
 
@@ -175,8 +251,8 @@ TMDB
 Upcoming Features
 
 🚀 Emby support
-🎬 Click-to-play functionality for Plex/Jellyfin
-🔍 More integrations based on user feedback!
+🎬 Click-to-play functionality for Plex/Jellyfin (still pondering)
+🔍 More integrations based on user feedback! Trakt calendar for instance...
 
 Contributors
 
