@@ -37,8 +37,9 @@ TMDB: Explore trending content (configurable for TV, movies, or both)
  
 *Media Player State (may remove)  currently if you and a media_player.jelly_or_plex it will show a small overlay of what is playing
 
+## Screenshots
 
-![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
+![VIEW](https://github.com/user-attachments/assets/e5eda74d-e50b-4dde-9985-45282dc99a51) ![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
 
 **Installation 
 HACS Installation 
