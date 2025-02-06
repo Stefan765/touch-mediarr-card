@@ -36,31 +36,6 @@ Trakt: Browse popular TV shows and movies
 TMDB: Explore trending content (configurable for TV, movies, or both)
  
 *Media Player State (may remove)  currently if you and a media_player.jelly_or_plex it will show a small overlay of what is playing
- as an alternative you could leave out the entity and do something like 
- ```
- type: custom:stack-in-card
- cards:
-   - type: conditional
-     conditions:
-       - condition: state
-         entity: media_player.entity
-         state_not: "off"
-     card:
-       type: custom:mushroom-media-player-card
-       entity: media_player.entity
-       use_media_info: true
-       primary_info: none
-       secondary_info: none
-       icon_type: none
-       media_controls:
-         - play_pause_stop
-   - type: custom:mediarr-card
-     jellyfin_entity: sensor.jellyfin_mediarr
-     sonarr_entity: sensor.sonarr_mediarr
-     seer_entity: sensor.seer_mediarr
-     radarr_entity: sensor.radarr_mediarr
-```
-
 
 
 ![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
