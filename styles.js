@@ -129,6 +129,10 @@ export const styles = `
   }
 
   /* Media Lists */
+  .seer-trending-list,
+  .seer-discover-list,
+  .seer-popular-movies-list,
+  .seer-popular-tv-list,
   .plex-list,
   .jellyfin-list,
   .sonarr-list,
@@ -151,6 +155,10 @@ export const styles = `
   }
 
   /* Scrollbar Styling */
+  .seer-trending-list::-webkit-scrollbar,
+  .seer-discover-list::-webkit-scrollbar,
+  .seer-popular-movies-list::-webkit-scrollbar,
+  .seer-popular-tv-list::-webkit-scrollbar,
   .plex-list::-webkit-scrollbar,
   .jellyfin-list::-webkit-scrollbar,
   .sonarr-list::-webkit-scrollbar,
@@ -182,12 +190,12 @@ export const styles = `
     height: 135px;
     position: relative;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transform: translateY(0);  /* Add this */
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;  /* Change this */
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-
   .media-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -258,18 +266,24 @@ export const styles = `
     overflow: hidden;
   }
 
-  /* Status Badges (for Seer) */
   .request-status {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7em;
+    top: 2px;
+    right: 2px;
+    padding: 1px;
+    border-radius: 2px;
     color: white;
     z-index: 2;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
-    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+  }
+
+  .status-icon {
+    --mdc-icon-size: 12px;
+    display: flex;
   }
 
   .status-pending { background-color: rgba(255, 152, 0, 0.8); }

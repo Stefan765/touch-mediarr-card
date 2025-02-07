@@ -7,25 +7,22 @@ export class PlexSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
+    super.updateInfo(cardInstance, item);  // Handle backgrounds
+    
     if (!item) return;
-
-    cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
-
-    // Check for empty state and clear the info if the item has a default title
     if (item.title_default) {
-      cardInstance.info.innerHTML = '';
-      return;
+        cardInstance.info.innerHTML = '';
+        return;
     }
 
     const releaseDate = item.release === 'TBA' ? 
-      'TBA' : 
-      (item.release ? new Date(item.release).toLocaleDateString() : 'TBA');
+        'TBA' : 
+        (item.release ? new Date(item.release).toLocaleDateString() : 'TBA');
 
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      ${item.number ? `<div class="details">${item.number}${item.episode ? ` - ${item.episode}` : ''}</div>` : ''}
-      <div class="metadata">Released: ${releaseDate}</div>
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        ${item.number ? `<div class="details">${item.number}${item.episode ? ` - ${item.episode}` : ''}</div>` : ''}
+        <div class="metadata">Released: ${releaseDate}</div>
     `;
   }
 

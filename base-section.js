@@ -33,28 +33,34 @@ export class BaseSection {
     `;
   }
 
+  // In BaseSection class
   updateInfo(cardInstance, item) {
     if (!item) return;
 
-    // Update main content background
-    cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
-
-    // Update card background if enough time has passed
-    const now = Date.now();
-    if (now - this._lastBackgroundUpdate > 5000) { // Only update every 5 seconds max
-      const bgImage = this.getRandomArtwork([item]);
-      if (bgImage && cardInstance.cardBackground) {
-        cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
-        this._lastBackgroundUpdate = now;
-      }
+    // Default image selection for banner/fanart convention
+    const mediaBackground = item.banner || item.fanart;
+    const cardBackground = item.fanart || item.banner;
+    
+    if (mediaBackground) {
+        cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
+        cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
     }
 
-    cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-    `;
-   }
+    if (cardBackground && cardInstance.cardBackground) {
+        cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
+    }
 
+    // Display debug info alongside regular info
+    cardInstance.info.innerHTML = `
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        <div style="font-size: 10px; margin-top: 10px; color: yellow;">
+            <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
+            <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
+            <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
+            <div>Using for media: ${mediaBackground}</div>
+        </div>
+    `;
+  }
   update(cardInstance, entity) {
     const items = entity.attributes.data || [];
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
@@ -75,30 +81,47 @@ export class BaseSection {
       }
     }
   }
-
+  // Also in addClickHandlers
   addClickHandlers(cardInstance, listElement, items) {
-      listElement.querySelectorAll('.media-item').forEach(item => {
-          item.onclick = () => {
-              const index = parseInt(item.dataset.index);
-              cardInstance.selectedType = this.key;
-              cardInstance.selectedIndex = index;
-              
-              // Update both backgrounds on selection
-              const selectedItem = items[index];
-              const background = selectedItem.fanart || selectedItem.backdrop || selectedItem.banner;
-              if (background) {
-                  cardInstance.background.style.backgroundImage = `url('${background}')`;
-                  cardInstance.cardBackground.style.backgroundImage = `url('${background}')`;
-              }
+    listElement.querySelectorAll('.media-item').forEach(item => {
+        item.onclick = () => {
+            const index = parseInt(item.dataset.index);
+            const selectedItem = items[index];
+            
+            console.log('Click handler - Selected item:', selectedItem.title);
+            console.log('Available images:', {
+                banner: selectedItem.banner,
+                fanart: selectedItem.fanart,
+                backdrop: selectedItem.backdrop,
+                poster: selectedItem.poster
+            });
 
-              this.updateInfo(cardInstance, items[index]);
+            cardInstance.selectedType = this.key;
+            cardInstance.selectedIndex = index;
+            
+            const mediaBackground = selectedItem.banner || selectedItem.fanart;
+            const cardBackground = selectedItem.fanart || selectedItem.banner;
+            
+            console.log('Selected backgrounds:', {
+                mediaBackground,
+                cardBackground
+            });
 
-              cardInstance.querySelectorAll('.media-item').forEach(i => {
-                  i.classList.toggle('selected', 
-                      i.dataset.type === this.key && parseInt(i.dataset.index) === index);
-              });
-          };
-      });
+            if (mediaBackground) {
+                cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
+            }
+            if (cardBackground) {
+                cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
+            }
+
+            this.updateInfo(cardInstance, items[index]);
+
+            cardInstance.querySelectorAll('.media-item').forEach(i => {
+                i.classList.toggle('selected', 
+                    i.dataset.type === this.key && parseInt(i.dataset.index) === index);
+            });
+        };
+    });
   }
 
   getRandomArtwork(items) {

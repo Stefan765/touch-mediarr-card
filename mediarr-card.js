@@ -8,6 +8,7 @@ import { TMDBSection } from './tmdb-section.js';
 import { TraktSection } from './trakt-section.js';
 import { styles } from './styles.js';
 
+
 class MediarrCard extends HTMLElement {
   constructor() {
     super();
@@ -15,7 +16,7 @@ class MediarrCard extends HTMLElement {
     this.selectedIndex = 0;
     this.collapsedSections = new Set();
     this.progressInterval = null;
-
+  
     this.sections = {
       plex: new PlexSection(),
       jellyfin: new JellyfinSection(),
@@ -153,15 +154,15 @@ class MediarrCard extends HTMLElement {
   initializeCard(hass) {
     // Get the order of configuration keys from the user's configuration
     const configKeys = Object.keys(this.config)
-      .filter(key => 
-        key.endsWith('_entity') || 
+      .filter(key =>
+        key.endsWith('_entity') ||
         key.startsWith('tmdb_') && key !== 'tmdb_url'
       );
-
+  
     // Build sections in the order specified by the configuration
     const orderedSections = configKeys.reduce((sections, key) => {
       let sectionKey = null;
-      
+     
       if (key === 'plex_entity') sectionKey = 'plex';
       else if (key === 'jellyfin_entity') sectionKey = 'jellyfin';
       else if (key === 'sonarr_entity') sectionKey = 'sonarr';
@@ -169,15 +170,14 @@ class MediarrCard extends HTMLElement {
       else if (key === 'seer_entity') sectionKey = 'seer';
       else if (key === 'trakt_entity') sectionKey = 'trakt';
       else if (key.startsWith('tmdb_')) sectionKey = 'tmdb';
-
+  
       if (sectionKey && !sections.includes(sectionKey)) {
         sections.push(sectionKey);
       }
-
       return sections;
     }, []);
-
-    this.innerHTML = 
+  
+    this.innerHTML =
       `<ha-card>
         <div class="card-background"></div>
         <div class="card-content">
@@ -190,7 +190,7 @@ class MediarrCard extends HTMLElement {
               <div class="client-list"></div>
             </div>
           </div>
-          
+         
           <div class="now-playing hidden">
             <div class="now-playing-background"></div>
             <div class="now-playing-content">
@@ -203,7 +203,7 @@ class MediarrCard extends HTMLElement {
               <div class="progress-bar-fill"></div>
             </div>
           </div>
-          
+         
           <div class="media-content">
             <div class="media-background"></div>
             <div class="media-info"></div>
@@ -211,28 +211,28 @@ class MediarrCard extends HTMLElement {
               <ha-icon class="play-icon" icon="mdi:play-circle-outline"></ha-icon>
             </div>
           </div>
-          
+         
           ${orderedSections
             .map(key => {
               const section = this.sections[key];
-              
+             
               if (key === 'tmdb') {
                 return section.sections
-                  .filter(tmdbSection => 
+                  .filter(tmdbSection =>
                     this.config[tmdbSection.entityKey]
                   )
-                  .map(tmdbSection => 
+                  .map(tmdbSection =>
                     section.generateTemplate(this.config, tmdbSection.entityKey)
                   )
                   .join('');
               }
-              
+             
               return section.generateTemplate(this.config);
             })
             .join('')}
         </div>
       </ha-card>`;
-
+  
     // Initialize elements
     this.content = this.querySelector('.media-content');
     this.background = this.querySelector('.media-background');
@@ -243,32 +243,30 @@ class MediarrCard extends HTMLElement {
     this.nowPlayingTitle = this.querySelector('.now-playing-title');
     this.nowPlayingSubtitle = this.querySelector('.now-playing-subtitle');
     this.progressBar = this.querySelector('.progress-bar-fill');
-    
-    // Set initial background if available
-    const firstBackground = Object.entries(this.sections).reduce((found, [key, section]) => {
-      if (found) return found;
-      if (key === 'tmdb') {
-        for (const tmdbSection of section.sections) {
-          const entityId = this.config[tmdbSection.entityKey];
-          if (entityId && hass.states[entityId]?.attributes?.data?.[0]) {
-            return hass.states[entityId].attributes.data[0].backdrop;
-          }
-        }
-      } else {
-        const entityId = this.config[`${key}_entity`];
-        if (entityId && hass.states[entityId]?.attributes?.data?.[0]) {
-          return hass.states[entityId].attributes.data[0].backdrop;
-        }
-      }
-      return found;
-    }, null);
+   
+    // Replace the background setting section with:
+    const firstSectionKey = orderedSections[0];
+    const entityId = this.config[`${firstSectionKey}_entity`];
 
-    if (firstBackground) {
-      this.background.style.backgroundImage = `url('${firstBackground}')`;
-      this.cardBackground.style.backgroundImage = `url('${firstBackground}')`;
-      this.background.style.opacity = this.config.opacity || 0.7;
+    if (entityId && hass.states[entityId]) {
+      const state = hass.states[entityId];
+      if (state.attributes.data?.[0]) {
+        const data = state.attributes.data[0];
+        const section = this.sections[firstSectionKey];
+        
+        // Set initial selection
+        this.selectedType = firstSectionKey;
+        this.selectedIndex = 0;
+        
+        // Use section's update logic for initial background
+        section.updateInfo(this, data);
+        
+        // Force immediate background update
+        this._lastBackgroundUpdate = 0;
+      }
     }
 
+    
     // Add styles
     const style = document.createElement('style');
     style.textContent = styles;
@@ -328,16 +326,12 @@ class MediarrCard extends HTMLElement {
     }
 
     Object.entries(this.sections).forEach(([key, section]) => {
-      if (key === 'tmdb') {
-        const tmdbEntities = [
-          'tmdb_entity',
-          'tmdb_airing_today_entity',
-          'tmdb_now_playing_entity',
-          'tmdb_on_air_entity',
-          'tmdb_upcoming_entity'
-        ];
-
-        tmdbEntities.forEach(entityKey => {
+      if (key === 'tmdb' || key === 'seer') {
+        const entities = key === 'tmdb' ? 
+          ['tmdb_entity', 'tmdb_airing_today_entity', 'tmdb_now_playing_entity', 'tmdb_on_air_entity', 'tmdb_upcoming_entity'] :
+          ['seer_entity', 'seer_trending_entity', 'seer_discover_entity', 'seer_popular_movies_entity', 'seer_popular_tv_entity'];
+  
+        entities.forEach(entityKey => {
           const entityId = this.config[entityKey];
           if (entityId && hass.states[entityId]) {
             section.update(this, hass.states[entityId]);
@@ -353,21 +347,30 @@ class MediarrCard extends HTMLElement {
   }
 
   setConfig(config) {
-    const tmdbEntities = [
-      'tmdb_entity',
-      'tmdb_airing_today_entity',
-      'tmdb_now_playing_entity',
-      'tmdb_on_air_entity',
-      'tmdb_upcoming_entity'
-    ];
+    const requiredEntities = {
+      tmdb: [
+        'tmdb_entity',
+        'tmdb_airing_today_entity',
+        'tmdb_now_playing_entity',
+        'tmdb_on_air_entity',
+        'tmdb_upcoming_entity'
+      ],
+      seer: [
+        'seer_entity',
+        'seer_trending_entity',
+        'seer_popular_movies_entity',
+        'seer_popular_tv_entity',
+        'seer_discover_entity'
+      ]
+    };
 
     const hasEntity = Object.keys(this.sections).some(key => {
-      if (key === 'tmdb') {
-        return tmdbEntities.some(entityKey => config[entityKey]);
+      if (requiredEntities[key]) {
+        return requiredEntities[key].some(entityKey => config[entityKey]);
       }
       return config[`${key}_entity`];
     });
-
+  
     if (!hasEntity) {
       throw new Error('Please define at least one media entity');
     }
@@ -394,6 +397,10 @@ class MediarrCard extends HTMLElement {
       sonarr_entity: 'sensor.sonarr_mediarr',
       radarr_entity: 'sensor.radarr_mediarr',
       seer_entity: 'sensor.seer_mediarr',
+      seer_trending_entity: 'sensor.seer_mediarr_trending',
+      seer_discover_entity: 'sensor.seer_mediarr_discover',
+      seer_popular_movies_entity: 'sensor.seer_mediarr_popular_movies',
+      seer_popular_tv_entity: 'sensor.seer_mediarr_popular_tv',
       trakt_entity: 'sensor.trakt_mediarr',
       media_player_entity: '',
       opacity: 0.7,

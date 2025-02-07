@@ -7,35 +7,30 @@ export class RadarrSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
+    super.updateInfo(cardInstance, item);  // Handle backgrounds
+    
     if (!item) return;
-
-    // Update backgrounds using parent class functionality
-    cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
-
-    // Check for empty state and clear the info if the item has a default title
     if (item.title_default) {
-      cardInstance.info.innerHTML = '';
-      return;
+        cardInstance.info.innerHTML = '';
+        return;
     }
 
     let releaseDate = '';
     if (item.release && !item.release.includes('Unknown')) {
-      const dateStr = item.release.split(' - ')[1] || item.release;
-      const date = new Date(dateStr);
-      if (!isNaN(date.getTime())) {
-        releaseDate = date.toLocaleDateString();
-      }
+        const dateStr = item.release.split(' - ')[1] || item.release;
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+            releaseDate = date.toLocaleDateString();
+        }
     }
 
     const runtime = item.runtime ? `${item.runtime} min` : '';
 
-    // Otherwise, show the item details
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      <div class="details">${item.genres || ''}</div>
-      <div class="metadata">${releaseDate}${runtime ? ` | ${runtime}` : ''}</div>
-      ${item.overview ? `<div class="overview">${item.overview}</div>` : ''}
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        <div class="details">${item.genres || ''}</div>
+        <div class="metadata">${releaseDate}${runtime ? ` | ${runtime}` : ''}</div>
+        ${item.overview ? `<div class="overview">${item.overview}</div>` : ''}
     `;
   }
 

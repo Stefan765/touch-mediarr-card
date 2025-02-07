@@ -7,11 +7,10 @@ export class JellyfinSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
+    // First handle backgrounds using base class logic
+    super.updateInfo(cardInstance, item);
+    
     if (!item) return;
-
-    // Use fanart directly without formatting
-    cardInstance.background.style.backgroundImage = `url('${item.fanart}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
 
     // Check for empty state and clear the info if the item has a default title
     if (item.title_default) {
@@ -19,6 +18,7 @@ export class JellyfinSection extends BaseSection {
       return;
     }
 
+    // Then add Jellyfin-specific info display
     const addedDate = item.release ? new Date(item.release).toLocaleDateString() : 'Unknown';
     const runtime = item.runtime ? `${item.runtime} min` : '';
     const subtitle = item.episode ? `${item.number || ''} - ${item.episode || ''}` : '';
@@ -50,6 +50,4 @@ export class JellyfinSection extends BaseSection {
       </div>
     `;
   }
-
-  
 }

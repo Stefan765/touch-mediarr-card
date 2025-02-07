@@ -7,32 +7,28 @@ export class SonarrSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
+    super.updateInfo(cardInstance, item);  // Handle backgrounds
+    
     if (!item) return;
-
-    cardInstance.background.style.backgroundImage = `url('${item.fanart || item.banner}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
-
-    // Check for empty state and clear the info if the item has a default title
     if (item.title_default) {
-      cardInstance.info.innerHTML = '';
-      return;
+        cardInstance.info.innerHTML = '';
+        return;
     }
 
     let airDate = '';
     if (item.release && item.release !== 'Unknown') {
-      const date = new Date(item.release);
-      if (!isNaN(date.getTime())) {
-        airDate = date.toLocaleDateString();
-      }
+        const date = new Date(item.release);
+        if (!isNaN(date.getTime())) {
+            airDate = date.toLocaleDateString();
+        }
     }
 
-    // Show the item details
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}</div>
-      <div class="details">${item.number || ''} - ${item.episode || ''}</div>
-      <div class="metadata">
-        Airs: ${airDate}${item.network ? ` on ${item.network}` : ''}
-      </div>
+        <div class="title">${item.title}</div>
+        <div class="details">${item.number || ''} - ${item.episode || ''}</div>
+        <div class="metadata">
+            Airs: ${airDate}${item.network ? ` on ${item.network}` : ''}
+        </div>
     `;
   }
 

@@ -72,17 +72,23 @@ export class TMDBSection extends BaseSection {
   updateInfo(cardInstance, item) {
     if (!item) return;
 
-    cardInstance.background.style.backgroundImage = `url('${item.backdrop}')`;
-    cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
+    // TMDB/Trakt specific image selection (using backdrop)
+    const mediaBackground = item.backdrop || item.poster;
+    const cardBackground = item.backdrop || item.poster;
+    
+    if (mediaBackground) {
+        cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
+        cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
+    }
 
+    if (cardBackground && cardInstance.cardBackground) {
+        cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
+    }
+
+    // Add any TMDB/Trakt specific info display
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      <div class="details">${item.type === 'movie' ? 'Movie' : 'TV Show'}</div>
-      <div class="metadata">
-        ${item.vote_average ? `Rating: ${item.vote_average}/10` : ''}
-        ${item.popularity ? ` | Popularity: ${Math.round(item.popularity)}` : ''}
-      </div>
-      ${item.overview ? `<div class="overview">${item.overview}</div>` : ''}
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        ${this.getAdditionalInfo(item)}
     `;
   }
 
