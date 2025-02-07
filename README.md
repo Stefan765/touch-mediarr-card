@@ -104,7 +104,7 @@ Step 1: Install and configure the Mediarr Server sensors
 
 Step 2: Add the Card to Lovelace
 
-Add the following YAML to your dashboard:  the order will be the same as you see in the card
+Add the following YAML to your dashboard:  the order will be the same as you see in the card, dont add too many
 ```
 type: custom:mediarr-card 
 media_player_entity: media_player.entity # optional for visual of whats currently playing
@@ -115,6 +115,13 @@ radarr_entity: sensor.radarr_mediarr
 seer_entity: sensor.seer_mediarr
 trakt_entity: sensor.trakt_mediarr
 tmdb_entity: sensor.tmdb_mediarr
+```
+# Optional Seer lists
+```
+seer_trending_entity: sensor.seer_mediarr_trending
+seer_discover_entity: sensor.seer_mediarr_discover
+seer_popular_movies_entity: sensor.seer_mediarr_popular_movies
+seer_popular_tv_entity: sensor.seer_mediarr_popular_tv
 ```
 # Optional TMDB lists
 ```
@@ -149,21 +156,25 @@ sensor:
       url: localhost
       api_key: your_api_key
       max_items: 10
-      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+      tmdb_api_key: "your_tmdb_api_key"
+      trending: true      
+      discover: true  
+      popular_movies: true  
+      popular_tv: true 
 
     sonarr:  # Optional
       url: http://localhost:8989
       api_key: your_sonarr_api_key
       max_items: 10
       days_to_check: 60
-      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+      tmdb_api_key: "your_tmdb_api_key" #remove, no longer needed
 
     radarr:  # Optional
       url: http://localhost:7878
       api_key: your_radarr_api_key
       max_items: 10
       days_to_check: 60 #breaking change
-      tmdb_api_key: "your_tmdb_api_key" # no longer needed
+      tmdb_api_key: "your_tmdb_api_key" #remove, no longer needed
     
     trakt:  # Optional
       client_id: "your_client_id"
@@ -190,12 +201,9 @@ days_to_check: Days to look ahead for upcoming content (Sonarr and Radarr only, 
 
 trending_type: Content type to display for Trakt and TMDB
 
+All entity configurations are optional, use only what you need
 
-Card Configuration
-
-All entity configurations are optional—use only what you need
-
-media_player_entity enables playback control (Coming Soon!)
+media_player_entity shows whats playing
 
 Getting API Keys
 
@@ -226,9 +234,9 @@ TMDB
 
 Upcoming Features
 
-🚀 Emby support
+🚀 Emby support maybe
 🎬 Click-to-play functionality for Plex/Jellyfin (still pondering)
-🔍 More integrations based on user feedback! Trakt calendar for instance...
+🔍 More integrations based on user feedback! 
 
 Contributors
 
