@@ -137,100 +137,11 @@ media_player_entity: media_player.your_plex_player
 **Options
 
 Sensor Configuration
-```yaml
-sensor:
-  - platform: mediarr
-    plex:  # Optional
-      host: localhost
-      port: xxxxxx
-      token: your_token
-
-    jellyfin:  # Optional
-      host: localhost
-      port: xxxxxx
-      token: your_api_key 
-      max_items: 10
-      tmdb_api_key: "your_tmdb_api_key"
-
-    seer: # Optional
-      url: localhost
-      api_key: your_api_key
-      max_items: 10
-      tmdb_api_key: "your_tmdb_api_key"
-      trending: true      
-      discover: true  
-      popular_movies: true  
-      popular_tv: true 
-
-    sonarr:  # Optional
-      url: http://localhost:8989
-      api_key: your_sonarr_api_key
-      max_items: 10
-      days_to_check: 60
-      tmdb_api_key: "your_tmdb_api_key" #remove, no longer needed
-
-    radarr:  # Optional
-      url: http://localhost:7878
-      api_key: your_radarr_api_key
-      max_items: 10
-      days_to_check: 60 #breaking change
-      tmdb_api_key: "your_tmdb_api_key" #remove, no longer needed
-    
-    trakt:  # Optional
-      client_id: "your_client_id"
-      client_secret: "your_client_secret"
-      tmdb_api_key: "your_tmdb_api_key"  # Required for posters
-      trending_type: both  # Options: movies, shows, both
-      max_items: 10
-     
-    
-    tmdb:  # Optional
-      api_key: "your_api_key"
-      trending_type: all  # Options: movie, tv, all
-      max_items: 10
-      trending: true          # Default endpoint
-      now_playing: true       # Optional
-      upcoming: true          # Optional
-      on_air: true            # Optional
-      airing_today: false     # Optional
-```
-
-max_items: Number of items to display (default: 10)
-
-days_to_check: Days to look ahead for upcoming content (Sonarr and Radarr only, default: 60)
-
-trending_type: Content type to display for Trakt and TMDB
+ ***see mediarr_sensor 
 
 All entity configurations are optional, use only what you need
 
 media_player_entity shows whats playing
-
-Getting API Keys
-
-Plex
-
-🔗 Find your Plex token
-
-Jellyfin
- Create an api-key in jellyfin
-
-Sonarr / Radarr / Seer
-
-1. Go to Settings → General
-
-2. Copy your API key
-
-Trakt
-
-1. Create an application at Trakt API
-
-2. Get your Client ID and Client Secret
-
-TMDB
-
-1. Create an account at TMDB
-
-2. Request an API key from your account settings
 
 Upcoming Features
 
