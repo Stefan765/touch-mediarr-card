@@ -154,11 +154,12 @@ class MediarrCard extends HTMLElement {
   initializeCard(hass) {
     // Get the order of configuration keys from the user's configuration
     const configKeys = Object.keys(this.config)
-      .filter(key =>
-        key.endsWith('_entity') ||
-        key.startsWith('tmdb_') && key !== 'tmdb_url'
+      .filter(key => 
+        key.endsWith('_entity') && 
+        this.config[key] && 
+        this.config[key].length > 0
       );
-  
+    
     // Build sections in the order specified by the configuration
     const orderedSections = configKeys.reduce((sections, key) => {
       let sectionKey = null;
@@ -170,7 +171,7 @@ class MediarrCard extends HTMLElement {
       else if (key === 'seer_entity') sectionKey = 'seer';
       else if (key === 'trakt_entity') sectionKey = 'trakt';
       else if (key.startsWith('tmdb_')) sectionKey = 'tmdb';
-  
+ 
       if (sectionKey && !sections.includes(sectionKey)) {
         sections.push(sectionKey);
       }
@@ -215,21 +216,11 @@ class MediarrCard extends HTMLElement {
           ${orderedSections
             .map(key => {
               const section = this.sections[key];
-             
-              if (key === 'tmdb') {
-                return section.sections
-                  .filter(tmdbSection =>
-                    this.config[tmdbSection.entityKey]
-                  )
-                  .map(tmdbSection =>
-                    section.generateTemplate(this.config, tmdbSection.entityKey)
-                  )
-                  .join('');
-              }
-             
+              // Always just call generateTemplate once, no special handling for tmdb needed
               return section.generateTemplate(this.config);
             })
-            .join('')}
+            .join('')}            
+             
         </div>
       </ha-card>`;
   
@@ -326,11 +317,17 @@ class MediarrCard extends HTMLElement {
     }
 
     Object.entries(this.sections).forEach(([key, section]) => {
-      if (key === 'tmdb' || key === 'seer') {
-        const entities = key === 'tmdb' ? 
-          ['tmdb_entity', 'tmdb_airing_today_entity', 'tmdb_now_playing_entity', 'tmdb_on_air_entity', 'tmdb_upcoming_entity'] :
-          ['seer_entity', 'seer_trending_entity', 'seer_discover_entity', 'seer_popular_movies_entity', 'seer_popular_tv_entity'];
-  
+      if (key === 'tmdb') {
+        const entities = ['tmdb_entity', 'tmdb_airing_today_entity', 'tmdb_now_playing_entity', 'tmdb_on_air_entity', 'tmdb_upcoming_entity'];
+        entities.forEach(entityKey => {
+          const entityId = this.config[entityKey];
+          if (entityId && hass.states[entityId]) {
+            section.update(this, hass.states[entityId]);
+          }
+        });
+      } else if (key === 'seer') {
+        // Keep Seer handling as is since it's working
+        const entities = ['seer_entity', 'seer_trending_entity', 'seer_discover_entity', 'seer_popular_movies_entity', 'seer_popular_tv_entity'];
         entities.forEach(entityKey => {
           const entityId = this.config[entityKey];
           if (entityId && hass.states[entityId]) {

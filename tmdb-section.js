@@ -3,13 +3,13 @@ import { BaseSection } from './base-section.js';
 
 export class TMDBSection extends BaseSection {
   constructor() {
-    super('tmdb', 'TMDB Content');
+    super('tmdb_container', '');
     this.sections = [
       { key: 'tmdb', title: 'Trending on TMDB', entityKey: 'tmdb_entity', listClass: 'tmdb-list' },
-      { key: 'tmdb_airing_today', title: 'TMDB Today', entityKey: 'tmdb_airing_today_entity', listClass: 'tmdb-airing-today-list' },
-      { key: 'tmdb_now_playing', title: 'TMDB Playing', entityKey: 'tmdb_now_playing_entity', listClass: 'tmdb-now-playing-list' },
-      { key: 'tmdb_on_air', title: 'TMDB On Air', entityKey: 'tmdb_on_air_entity', listClass: 'tmdb-on-air-list' },
-      { key: 'tmdb_upcoming', title: 'TMDB Upcoming', entityKey: 'tmdb_upcoming_entity', listClass: 'tmdb-upcoming-list' }
+      { key: 'tmdb_airing_today', title: 'Airing Today', entityKey: 'tmdb_airing_today_entity', listClass: 'tmdb-airing-today-list' },
+      { key: 'tmdb_now_playing', title: 'Now Playing', entityKey: 'tmdb_now_playing_entity', listClass: 'tmdb-now-playing-list' },
+      { key: 'tmdb_on_air', title: 'On Air', entityKey: 'tmdb_on_air_entity', listClass: 'tmdb-on-air-list' },
+      { key: 'tmdb_upcoming', title: 'Upcoming', entityKey: 'tmdb_upcoming_entity', listClass: 'tmdb-upcoming-list' }
     ];
   }
 
@@ -33,24 +33,16 @@ export class TMDBSection extends BaseSection {
 
   update(cardInstance, entity) {
     const entityId = entity.entity_id;
-    // Find the section that matches this entity
     const sectionConfig = this.sections.find(section => 
       cardInstance.config[section.entityKey] === entityId
     );
     
-    if (!sectionConfig) {
-      console.error(`Could not find section config for entity ${entityId}`);
-      return;
-    }
+    if (!sectionConfig) return;
+
+    const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
+    if (!listElement) return;
 
     const items = entity.attributes.data || [];
-    const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
-    
-    if (!listElement) {
-      console.error(`Could not find list element for ${sectionConfig.key}`);
-      return;
-    }
-
     listElement.innerHTML = items.map((item, index) => 
       this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex, sectionConfig.key)
     ).join('');
@@ -72,7 +64,6 @@ export class TMDBSection extends BaseSection {
   updateInfo(cardInstance, item) {
     if (!item) return;
 
-    // TMDB/Trakt specific image selection (using backdrop)
     const mediaBackground = item.backdrop || item.poster;
     const cardBackground = item.backdrop || item.poster;
     
@@ -85,26 +76,9 @@ export class TMDBSection extends BaseSection {
         cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
     }
 
-    // Add any TMDB/Trakt specific info display
     cardInstance.info.innerHTML = `
         <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-        ${this.getAdditionalInfo(item)}
+        <div class="overview">${item.overview || ''}</div>
     `;
-  }
-
-  addClickHandlers(cardInstance, listElement, items, sectionKey) {
-    listElement.querySelectorAll('.media-item').forEach(item => {
-      item.onclick = () => {
-        const index = parseInt(item.dataset.index);
-        cardInstance.selectedType = sectionKey;
-        cardInstance.selectedIndex = index;
-        this.updateInfo(cardInstance, items[index]);
-
-        cardInstance.querySelectorAll('.media-item').forEach(i => {
-          i.classList.toggle('selected', 
-            i.dataset.type === sectionKey && parseInt(i.dataset.index) === index);
-        });
-      };
-    });
   }
 }

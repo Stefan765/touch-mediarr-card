@@ -37,64 +37,84 @@ export class SeerSection extends BaseSection {
       `).join('');
   }
 
+  generateMediaItem(item, index, selectedType, selectedIndex, sectionKey) {
+    return `
+      <div class="media-item ${selectedType === sectionKey && index === selectedIndex ? 'selected' : ''}"
+           data-type="${sectionKey}"
+           data-index="${index}">
+        <img src="${item.poster || '/api/placeholder/400/600'}" alt="${item.title || item.name || ''}">
+        <div class="media-item-title">${item.title || item.name || ''}</div>
+      </div>
+    `;
+  }
+
   update(cardInstance, entity) {
     const entityId = entity.entity_id;
     const sectionConfig = this.sections.find(section => 
       cardInstance.config[section.entityKey] === entityId
     );
     
-    if (!sectionConfig) {
-      console.error(`Could not find section config for entity ${entityId}`);
-      return;
-    }
+    if (!sectionConfig) return;
 
     const items = entity.attributes.data || [];
     const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
     
-    if (!listElement) {
-      console.error(`Could not find list element for ${sectionConfig.key}`);
-      return;
-    }
+    if (!listElement) return;
 
     listElement.innerHTML = items.map((item, index) => 
       this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex, sectionConfig.key)
     ).join('');
 
     this.addClickHandlers(cardInstance, listElement, items, sectionConfig.key);
+
+    // Store the requests data for checking status
+    if (entity.entity_id === cardInstance.config.seer_entity) {
+      this.existingRequests = items;
+    }
   }
 
-  generateMediaItem(item, index, selectedType, selectedIndex, sectionKey) {
-    const isRequest = sectionKey === 'seer';
-    const title = item.title || item.name || '';
-    const poster = item.poster || '';
-
-    let statusHtml = '';
-    if (isRequest && item.status) {
-      const statusInfo = this._getStatusInfo(item.status);
-      statusHtml = `
-        <div class="request-status ${statusInfo.class}">
-          <ha-icon icon="${statusInfo.icon}" class="status-icon"></ha-icon>
-        </div>`;
+  async checkIfRequested(cardInstance, item) {
+    if (!this.existingRequests) {
+      // Get requests from the seer entity
+      const seerEntity = cardInstance.config.seer_entity;
+      if (seerEntity && cardInstance._hass.states[seerEntity]) {
+        this.existingRequests = cardInstance._hass.states[seerEntity].attributes.data || [];
+      } else {
+        this.existingRequests = [];
+      }
     }
 
-    return `
-      <div class="media-item ${selectedType === sectionKey && index === selectedIndex ? 'selected' : ''}"
-           data-type="${sectionKey}"
-           data-index="${index}">
-        ${statusHtml}
-        <img src="${poster || '/api/placeholder/400/600'}" alt="${title}">
-        <div class="media-item-title">${title}</div>
-      </div>
-    `;
-  }
+    // First try to match by TMDb ID
+    const tmdbId = item.tmdbId || item.id;
+    if (tmdbId) {
+      return this.existingRequests.find(request => {
+        const requestTmdbId = request.media?.tmdbId || request.tmdbId;
+        return requestTmdbId === tmdbId;
+      });
+    }
 
-  updateInfo(cardInstance, item) {
+    // If no TMDb ID, try to match by title and year (less reliable)
+    if (item.title && item.year) {
+      return this.existingRequests.find(request => 
+        request.title === item.title && 
+        request.year === item.year
+      );
+    }
+
+    return null;  // No match found
+  }
+  async updateInfo(cardInstance, item, sectionKey) {
     if (!item) return;
 
     const title = item.title || item.name || '';
     const overview = item.overview || '';
     const year = item.year || '';
-    const type = item.type || '';
+    const type = this._determineMediaType(item, sectionKey);
+    
+    // Use the correct property name
+    const tmdbId = item.id;  // Use 'id' instead of 'tmdbId'
+    console.log('Item full data:', item); // Let's see the whole item
+    console.log('TMDB ID found:', tmdbId); // See what we get
 
     const mediaBackground = item.fanart || item.poster || '';
     const cardBackground = item.fanart || item.poster || '';
@@ -106,6 +126,43 @@ export class SeerSection extends BaseSection {
 
     if (cardBackground && cardInstance.cardBackground) {
       cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
+    }
+
+    // Check if item is already requested
+    const existingRequest = await this.checkIfRequested(cardInstance, item);
+    
+    let actionButton = '';
+    if (sectionKey !== 'seer') {
+      if (existingRequest) {
+        const statusInfo = this._getStatusInfo(existingRequest.status);
+        actionButton = `
+          <div class="request-button-container">
+            <button class="request-button ${statusInfo.class}" disabled>
+              <ha-icon icon="${statusInfo.icon}"></ha-icon>
+              ${statusInfo.text}
+            </button>
+          </div>
+        `;
+      } else {
+        actionButton = `
+          <div class="request-button-container">
+            <button class="request-button" onclick="this.dispatchEvent(new CustomEvent('seer-request', {
+              bubbles: true,
+              detail: {
+                title: '${title.replace(/'/g, "\\'")}',
+                year: '${year}',
+                type: '${type}',
+                tmdb_id: ${tmdbId},  // Pass the TMDB ID as a number
+                poster: '${(item.poster || '').replace(/'/g, "\\'")}',
+                overview: '${overview.replace(/'/g, "\\'")}'
+              }
+            }))">
+              <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
+              Request
+            </button>
+          </div>
+        `;
+      }
     }
 
     if (item.status) {
@@ -122,13 +179,25 @@ export class SeerSection extends BaseSection {
       `;
     } else {
       cardInstance.info.innerHTML = `
-        <div class="title">${title}${year ? ` (${year})` : ''}</div>
-        <div class="details">
-          ${type ? `<div class="type">${type}</div>` : ''}
-          ${overview ? `<div class="overview">${overview}</div>` : ''}
+        <div class="media-info-container">
+          <div class="title">${title}${year ? ` (${year})` : ''}</div>
+          <div class="details">
+            ${type ? `<div class="type">${type}</div>` : ''}
+            ${overview ? `<div class="overview">${overview}</div>` : ''}
+          </div>
+          ${actionButton}
         </div>
       `;
     }
+  }
+
+  _determineMediaType(item, sectionKey) {
+    if (item.type) return item.type;
+    if (sectionKey === 'seer_popular_movies' || item.media_type === 'movie') return 'movie';
+    if (sectionKey === 'seer_popular_tv' || item.media_type === 'tv') return 'tv';
+    if (item.first_air_date) return 'tv';
+    if (item.release_date) return 'movie';
+    return 'movie';
   }
 
   addClickHandlers(cardInstance, listElement, items, sectionKey) {
@@ -137,7 +206,7 @@ export class SeerSection extends BaseSection {
         const index = parseInt(item.dataset.index);
         cardInstance.selectedType = sectionKey;
         cardInstance.selectedIndex = index;
-        this.updateInfo(cardInstance, items[index]);
+        this.updateInfo(cardInstance, items[index], sectionKey);
 
         cardInstance.querySelectorAll('.media-item').forEach(i => {
           i.classList.toggle('selected', 
@@ -145,6 +214,123 @@ export class SeerSection extends BaseSection {
         });
       };
     });
+
+    // Add request button click handler if not already added
+    if (!cardInstance._seerRequestHandlerAdded) {
+      cardInstance.addEventListener('seer-request', async (e) => {
+        const { title, year, type, tmdb_id } = e.detail;
+    
+        try {
+          const parsedTmdbId = parseInt(tmdb_id, 10);
+          if (isNaN(parsedTmdbId)) {
+            throw new Error('Invalid TMDB ID');
+          }
+    
+          // Load existing requests if not cached
+          if (!this.existingRequests) {
+            const seerEntity = cardInstance.config.seer_entity;
+            if (seerEntity && cardInstance._hass.states[seerEntity]) {
+              this.existingRequests = cardInstance._hass.states[seerEntity].attributes.data || [];
+            } else {
+              this.existingRequests = [];
+            }
+          }
+    
+          // Check if the media is already requested
+          const existingRequest = this.existingRequests.find(request => {
+            return request.title.toLowerCase() === title.toLowerCase() &&
+                   (!year || request.year == year);
+          });
+    
+          if (existingRequest && type.toUpperCase() === 'MOVIE') {
+            alert(`"${title}" has already been requested.`);
+            return;
+          }
+    
+          // TV Shows can be re-requested for different seasons
+          let action, data;
+    
+          if (type.toUpperCase() === 'TV SHOW') {
+            // Create a modal for season selection
+            const season = await new Promise((resolve) => {
+              const modal = document.createElement('div');
+              modal.style.position = 'fixed';
+              modal.style.top = '50%';
+              modal.style.left = '50%';
+              modal.style.transform = 'translate(-50%, -50%)';
+              modal.style.background = '#333'; // Dark theme
+              modal.style.color = 'white';
+              modal.style.padding = '20px';
+              modal.style.boxShadow = '0px 0px 15px rgba(255,255,255,0.3)';
+              modal.style.borderRadius = '10px';
+              modal.style.textAlign = 'center';
+              modal.style.zIndex = '1000';
+    
+              modal.innerHTML = `
+                <p style="margin-bottom:10px;">Select season for "<strong>${title}</strong>":</p>
+                <select id="season-select" style="padding:5px; font-size:16px;">
+                  <option value="first">First</option>
+                  <option value="latest">Latest</option>
+                  <option value="all" selected>All</option>
+                </select>
+                <br><br>
+                <button id="confirm-season" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+              `;
+    
+              document.body.appendChild(modal);
+    
+              document.getElementById('confirm-season').onclick = () => {
+                resolve(document.getElementById('season-select').value);
+                document.body.removeChild(modal);
+              };
+            });
+    
+            data = { name: title, season };
+            action = 'overseerr.submit_tv_request';
+          } else if (type.toUpperCase() === 'MOVIE') {
+            data = { name: title };
+            action = 'overseerr.submit_movie_request';
+          } else {
+            throw new Error('Unknown media type');
+          }
+    
+          // Call the Overseerr service
+          await window.document.querySelector('home-assistant')
+            ?.hass.callService('overseerr', action.split('.')[1], data);
+    
+          // Update button to show status
+          const button = cardInstance.querySelector('.request-button');
+          if (button) {
+            button.innerHTML = `
+              <ha-icon icon="mdi:check-circle-outline"></ha-icon>
+              Requested
+            `;
+            button.classList.add('status-approved');
+            button.disabled = true;
+          }
+    
+          // Clear cached requests to force refresh
+          this.existingRequests = null;
+    
+        } catch (error) {
+          console.error('Error sending media request:', error);
+          const button = cardInstance.querySelector('.request-button');
+          if (button) {
+            button.innerHTML = `
+              <ha-icon icon="mdi:alert-circle"></ha-icon>
+              Failed
+            `;
+            button.classList.add('status-declined');
+          }
+        }
+      });
+    
+      cardInstance._seerRequestHandlerAdded = true;
+    }
+    
+    
+    
+    
   }
 
   _getStatusInfo(statusCode) {

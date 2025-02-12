@@ -2,34 +2,34 @@
 export const styles = `
   /* Card Base */
   ha-card {
-  overflow: hidden;
-  padding: 0; /* Remove padding */
-  position: relative;
-  background: transparent;
-  margin: 0; /* Remove margin */
-  width: 100%;
-}
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    background: transparent;
+    margin: 0;
+    width: 100%;
+  }
 
-.card-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(20px) brightness(0.7);
-  transform: scale(1.2);
-  transition: background-image 0.5s ease-in-out;
-  z-index: 0;
-  border-radius: 0; /* Remove border radius */
-}
+  .card-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px) brightness(0.7);
+    transform: scale(1.2);
+    transition: background-image 0.5s ease-in-out;
+    z-index: 0;
+    border-radius: 0;
+  }
 
-.card-content {
-  position: relative;
-  z-index: 1;
-  padding: 0; 
-}
+  .card-content {
+    position: relative;
+    z-index: 1;
+    padding: 0; 
+  }
 
   /* Media Content Section */
   .media-content {
@@ -146,7 +146,7 @@ export const styles = `
   .tmdb-upcoming-list {
     padding: 0 4px;
     display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping */
+    flex-wrap: nowrap;
     gap: 4px;
     overflow-x: auto;
     scrollbar-width: thin;
@@ -183,19 +183,20 @@ export const styles = `
     border-radius: 2px;
   }
 
-   /* Media Items */
+  /* Media Items */
   .media-item {
-    flex: 0 0 auto; /* Don't grow or shrink */
-    width: 85px; /* Fixed width instead of percentage */
+    flex: 0 0 auto;
+    width: 85px;
     height: 135px;
     position: relative;
     cursor: pointer;
-    transform: translateY(0);  /* Add this */
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;  /* Change this */
+    transform: translateY(0);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
+
   .media-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -264,6 +265,74 @@ export const styles = `
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Request Button Styles */
+  .media-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .request-button-container {
+    margin-top: 8px;
+  }
+
+  .request-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--primary-color, #03a9f4);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+
+  .request-button:hover {
+    background: var(--primary-color-light, #35baf6);
+  }
+
+  .request-button ha-icon {
+    --mdc-icon-size: 18px;
+  }
+
+  /* Status Styles */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .status-pending {
+    background: var(--warning-color, #ffa726);
+    color: var(--warning-text-color, black);
+  }
+
+  .status-approved {
+    background: var(--success-color, #66bb6a);
+    color: var(--success-text-color, white);
+  }
+
+  .status-declined {
+    background: var(--error-color, #ef5350);
+    color: var(--error-text-color, white);
+  }
+
+  .status-available {
+    background: var(--info-color, #29b6f6);
+    color: var(--info-text-color, white);
+  }
+
+  .status-unknown {
+    background: var(--secondary-text-color, #9e9e9e);
+    color: var(--text-primary-color, white);
   }
 
   .request-status {
