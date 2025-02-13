@@ -242,8 +242,9 @@ export const styles = `
   .title {
     font-size: 1.2em;
     font-weight: 500;
-    margin-bottom: 2px;
+    margin-bottom: 0; /* Reduced from 2px */
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+
   }
 
   .details {
@@ -258,37 +259,37 @@ export const styles = `
   }
 
   .overview {
-    margin-top: 8px;
+    margin-top: 2px;
     font-size: 0.9em;
-    opacity: 0.9;
+    opacity: 0.7;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
+    overflow: ellipsis;
   }
 
   /* Request Button Styles */
   .media-info-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px; /* Reduced from 16px */
   }
 
   .request-button-container {
-    margin-top: 8px;
+    margin-top: 4px;
   }
 
   .request-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 4px 12px;
     background: var(--primary-color, #03a9f4);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     transition: background-color 0.3s;
   }
 
@@ -300,6 +301,18 @@ export const styles = `
     --mdc-icon-size: 18px;
   }
 
+  .title-line {
+  display: flex; /* or inline-flex */
+  align-items: baseline; /* Align items to the baseline of the text */
+  }
+
+  .title-line .type {
+    margin-right: 5px; /* Space between type and title */
+  }
+
+  .title-line .type, .title-line .title {
+    white-space: nowrap; /* Prevents wrapping of type and title */
+  }
   /* Status Styles */
   .status {
     display: inline-flex;

@@ -179,15 +179,16 @@ export class SeerSection extends BaseSection {
       `;
     } else {
       cardInstance.info.innerHTML = `
-        <div class="media-info-container">
+        
           <div class="title">${title}${year ? ` (${year})` : ''}</div>
-          <div class="details">
-            ${type ? `<div class="type">${type}</div>` : ''}
+          
+            
             ${overview ? `<div class="overview">${overview}</div>` : ''}
           </div>
-          ${actionButton}
+          ${actionButton} ${type ? `<div class="type">${type}</div>` : ''}
         </div>
       `;
+      
     }
   }
 

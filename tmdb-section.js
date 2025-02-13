@@ -77,6 +77,7 @@ export class TMDBSection extends BaseSection {
     }
 
     cardInstance.info.innerHTML = `
+        <div class="type">${item.type.toUpperCase()}</div>
         <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
         <div class="overview">${item.overview || ''}</div>
     `;
