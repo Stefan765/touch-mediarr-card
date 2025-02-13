@@ -29,7 +29,9 @@ Other Arrs can easily be added
 
 *Media Discovery
 
-Overseerr / Jellyseer: View     media requests with status and requestor
+Overseerr / Jellyseer: View     media requests with status and requestor  
+![request](https://github.com/user-attachments/assets/dc794192-cb27-4d9a-b57c-95dc33d25d22) ![status](https://github.com/user-attachments/assets/6819af31-05c6-4c82-8660-0bf337dcb809)
+!!!!!!!This will not work without the excellent overseer addon by vaparr at https://github.com/vaparr/ha-overseerr!!!!!!!!!!!!!!!
 
 Trakt: Browse popular TV shows and movies
    - may be adding trakt calendar lists, i make no promises.  I do not use trakt
