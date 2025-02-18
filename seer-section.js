@@ -185,12 +185,15 @@ export class SeerSection extends BaseSection {
         </div>
       `;
     } else {
-      cardInstance.info.innerHTML = `
-        <div class="title">${title}${year ? ` (${year})` : ''}</div>
-        ${overview ? `<div class="overview">${overview}</div>` : ''}
-        ${actionButton} ${type ? `<div class="type">${type}</div>` : ''}
-      `;
-    }
+  cardInstance.info.innerHTML = `
+    <div class="title">${title}${year ? ` (${year})` : ''}</div>
+    ${overview ? `<div class="overview">${overview}</div>` : ''}
+    <div class="details">
+      ${actionButton}
+      ${type ? `<span class="type">${type}</span>` : ''}
+    </div>
+  `;
+  }
   }
 
   _determineMediaType(item, sectionKey) {

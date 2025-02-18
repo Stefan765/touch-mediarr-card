@@ -50,15 +50,20 @@ export class TMDBSection extends BaseSection {
     this.addClickHandlers(cardInstance, listElement, items, sectionConfig.key);
   }
 
-  generateMediaItem(item, index, selectedType, selectedIndex, sectionKey) {
-    return `
-      <div class="media-item ${selectedType === sectionKey && index === selectedIndex ? 'selected' : ''}"
-           data-type="${sectionKey}"
-           data-index="${index}">
-        <img src="${item.poster || '/api/placeholder/400/600'}" alt="${item.title}">
-        <div class="media-item-title">${item.title}</div>
-      </div>
-    `;
+  addClickHandlers(cardInstance, listElement, items, sectionKey) {
+    listElement.querySelectorAll('.media-item').forEach(item => {
+      item.onclick = () => {
+        const index = parseInt(item.dataset.index);
+        cardInstance.selectedType = sectionKey;
+        cardInstance.selectedIndex = index;
+        this.updateInfo(cardInstance, items[index]);
+
+        cardInstance.querySelectorAll('.media-item').forEach(i => {
+          i.classList.toggle('selected', 
+            i.dataset.type === sectionKey && parseInt(i.dataset.index) === index);
+        });
+      };
+    });
   }
 
   updateInfo(cardInstance, item) {
@@ -80,6 +85,25 @@ export class TMDBSection extends BaseSection {
         <div class="type">${item.type.toUpperCase()}</div>
         <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
         <div class="overview">${item.overview || ''}</div>
+        <div class="details">
+          <div class="request-button-container">
+            <button class="request-button" onclick="this.dispatchEvent(new CustomEvent('seer-request', {
+              bubbles: true,
+              detail: {
+                title: '${item.title.replace(/'/g, "\\'")}',
+                year: '${item.year || ''}',
+                type: '${item.type}',
+                tmdb_id: ${item.tmdb_id},
+                poster: '${(item.poster || '').replace(/'/g, "\\'")}',
+                overview: '${(item.overview || '').replace(/'/g, "\\'")}'
+              }
+            }))">
+              <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
+              Request
+            </button>
+          </div>
+          ${item.vote_average ? `<div class="rating">Rating: ${item.vote_average}/10</div>` : ''}
+        </div>
     `;
   }
 }
