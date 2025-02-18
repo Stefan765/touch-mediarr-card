@@ -103,6 +103,7 @@ export class SeerSection extends BaseSection {
 
     return null;  // No match found
   }
+
   async updateInfo(cardInstance, item, sectionKey) {
     if (!item) return;
 
@@ -111,10 +112,9 @@ export class SeerSection extends BaseSection {
     const year = item.year || '';
     const type = this._determineMediaType(item, sectionKey);
     
-    // Use the correct property name
-    const tmdbId = item.id;  // Use 'id' instead of 'tmdbId'
-    console.log('Item full data:', item); // Let's see the whole item
-    console.log('TMDB ID found:', tmdbId); // See what we get
+    const tmdbId = item.id;
+    console.log('Item full data:', item);
+    console.log('TMDB ID found:', tmdbId);
 
     const mediaBackground = item.fanart || item.poster || '';
     const cardBackground = item.fanart || item.poster || '';
@@ -152,7 +152,7 @@ export class SeerSection extends BaseSection {
                 title: '${title.replace(/'/g, "\\'")}',
                 year: '${year}',
                 type: '${type}',
-                tmdb_id: ${tmdbId},  // Pass the TMDB ID as a number
+                tmdb_id: ${tmdbId},
                 poster: '${(item.poster || '').replace(/'/g, "\\'")}',
                 overview: '${overview.replace(/'/g, "\\'")}'
               }
@@ -170,7 +170,14 @@ export class SeerSection extends BaseSection {
       cardInstance.info.innerHTML = `
         <div class="title">${title}</div>
         <div class="details">
-          <span class="status ${statusInfo.class}">
+          <span class="status ${statusInfo.class}" onclick="this.dispatchEvent(new CustomEvent('change-status', {
+            bubbles: true,
+            detail: {
+              title: '${title.replace(/'/g, "\\'")}',
+              type: '${item.media_type || 'movie'}',
+              request_id: ${item.request_id || 0}
+            }
+          }))">
             <ha-icon icon="${statusInfo.icon}"></ha-icon>
             ${statusInfo.text}
           </span>
@@ -179,16 +186,10 @@ export class SeerSection extends BaseSection {
       `;
     } else {
       cardInstance.info.innerHTML = `
-        
-          <div class="title">${title}${year ? ` (${year})` : ''}</div>
-          
-            
-            ${overview ? `<div class="overview">${overview}</div>` : ''}
-          </div>
-          ${actionButton} ${type ? `<div class="type">${type}</div>` : ''}
-        </div>
+        <div class="title">${title}${year ? ` (${year})` : ''}</div>
+        ${overview ? `<div class="overview">${overview}</div>` : ''}
+        ${actionButton} ${type ? `<div class="type">${type}</div>` : ''}
       `;
-      
     }
   }
 
@@ -215,8 +216,60 @@ export class SeerSection extends BaseSection {
         });
       };
     });
+    
+    if (!cardInstance._statusChangeHandlerAdded) {
+      cardInstance.addEventListener('change-status', async (e) => {
+        const { title, type, request_id } = e.detail;
 
-    // Add request button click handler if not already added
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.background = '#333';
+        modal.style.color = 'white';
+        modal.style.padding = '20px';
+        modal.style.boxShadow = '0px 0px 15px rgba(255,255,255,0.3)';
+        modal.style.borderRadius = '10px';
+        modal.style.textAlign = 'center';
+        modal.style.zIndex = '1000';
+
+        modal.innerHTML = `
+          <p style="margin-bottom:10px;">Update status for "<strong>${title}</strong>":</p>
+          <select id="status-select" style="padding:5px; font-size:16px;">
+            <option value="approve">Approve</option>
+            <option value="decline">Decline</option>
+            <option value="remove">Remove</option>
+          </select>
+          <br><br>
+          <button id="confirm-status" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('confirm-status').onclick = async () => {
+          const new_status = document.getElementById('status-select').value;
+          document.body.removeChild(modal);
+
+          await window.document.querySelector('home-assistant')
+            ?.hass.callService('mediarr', 'update_request', {
+              name: title,
+              type: type,
+              new_status: new_status,
+              request_id: request_id
+            });
+
+          // Force a re-render of the current item
+          if (typeof cardInstance.selectedIndex !== 'undefined' && cardInstance.selectedType) {
+            const items = cardInstance._hass.states[cardInstance.config.seer_entity].attributes.data || [];
+            this.updateInfo(cardInstance, items[cardInstance.selectedIndex], cardInstance.selectedType);
+          }
+        };
+      });
+
+      cardInstance._statusChangeHandlerAdded = true;
+    }
+
     if (!cardInstance._seerRequestHandlerAdded) {
       cardInstance.addEventListener('seer-request', async (e) => {
         const { title, year, type, tmdb_id } = e.detail;
@@ -227,7 +280,6 @@ export class SeerSection extends BaseSection {
             throw new Error('Invalid TMDB ID');
           }
     
-          // Load existing requests if not cached
           if (!this.existingRequests) {
             const seerEntity = cardInstance.config.seer_entity;
             if (seerEntity && cardInstance._hass.states[seerEntity]) {
@@ -237,7 +289,6 @@ export class SeerSection extends BaseSection {
             }
           }
     
-          // Check if the media is already requested
           const existingRequest = this.existingRequests.find(request => {
             return request.title.toLowerCase() === title.toLowerCase() &&
                    (!year || request.year == year);
@@ -248,18 +299,16 @@ export class SeerSection extends BaseSection {
             return;
           }
     
-          // TV Shows can be re-requested for different seasons
           let action, data;
     
           if (type.toUpperCase() === 'TV SHOW') {
-            // Create a modal for season selection
-            const season = await new Promise((resolve) => {
+            const season = await new Promise((resolve, reject) => {
               const modal = document.createElement('div');
               modal.style.position = 'fixed';
               modal.style.top = '50%';
               modal.style.left = '50%';
               modal.style.transform = 'translate(-50%, -50%)';
-              modal.style.background = '#333'; // Dark theme
+              modal.style.background = '#333';
               modal.style.color = 'white';
               modal.style.padding = '20px';
               modal.style.boxShadow = '0px 0px 15px rgba(255,255,255,0.3)';
@@ -281,25 +330,30 @@ export class SeerSection extends BaseSection {
               document.body.appendChild(modal);
     
               document.getElementById('confirm-season').onclick = () => {
-                resolve(document.getElementById('season-select').value);
+                const selectedSeason = document.getElementById('season-select').value;
                 document.body.removeChild(modal);
+                resolve(selectedSeason);
               };
+
+              window.addEventListener('unhandledrejection', () => {
+                if (document.body.contains(modal)) {
+                  document.body.removeChild(modal);
+                }
+              }, { once: true });
             });
     
             data = { name: title, season };
-            action = 'overseerr.submit_tv_request';
+            action = 'mediarr.submit_tv_request';
           } else if (type.toUpperCase() === 'MOVIE') {
             data = { name: title };
-            action = 'overseerr.submit_movie_request';
+            action = 'mediarr.submit_movie_request';
           } else {
             throw new Error('Unknown media type');
           }
     
-          // Call the Overseerr service
           await window.document.querySelector('home-assistant')
-            ?.hass.callService('overseerr', action.split('.')[1], data);
+            ?.hass.callService('mediarr', action.split('.')[1], data);
     
-          // Update button to show status
           const button = cardInstance.querySelector('.request-button');
           if (button) {
             button.innerHTML = `
@@ -310,7 +364,6 @@ export class SeerSection extends BaseSection {
             button.disabled = true;
           }
     
-          // Clear cached requests to force refresh
           this.existingRequests = null;
     
         } catch (error) {
@@ -328,10 +381,6 @@ export class SeerSection extends BaseSection {
     
       cardInstance._seerRequestHandlerAdded = true;
     }
-    
-    
-    
-    
   }
 
   _getStatusInfo(statusCode) {

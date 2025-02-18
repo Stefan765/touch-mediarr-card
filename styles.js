@@ -269,6 +269,38 @@ export const styles = `
   }
 
   /* Request Button Styles */
+  .action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  }
+
+  .action-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    font-size: 14px;
+  }
+
+  .remove-button {
+    background-color: #dc3545;
+  }
+
+  .change-button {
+    background-color: #17a2b8;
+  }
+
+  .status-removed {
+    background-color: #6c757d;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
   .media-info-container {
     display: flex;
     flex-direction: column;
