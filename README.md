@@ -11,7 +11,7 @@ Modular Design
 ✅ Collapsible sections
 ✅ Dynamic backgrounds
 
-*Media Server Integration
+✅ Media Server Integration
 
 Plex: View recently added content
 
@@ -19,7 +19,7 @@ Jellyfin: View recently added content
 
 Emby: (may come soon!)
 
-*Media Management
+✅ Media Management
 
 Sonarr: View upcoming TV shows and episodes
 
@@ -27,7 +27,7 @@ Radarr: Track upcoming movie releases
 
 Other Arrs can easily be added
 
-*Media Discovery
+✅ Media Discovery
 
 Overseerr / Jellyseer: View     media requests with status and requestor  
 ![request](https://github.com/user-attachments/assets/dc794192-cb27-4d9a-b57c-95dc33d25d22) ![status](https://github.com/user-attachments/assets/6819af31-05c6-4c82-8660-0bf337dcb809)
@@ -52,6 +52,9 @@ TMDB: Explore trending content (configurable for TV, movies, or both)
 ![VIEW](https://github.com/user-attachments/assets/e5eda74d-e50b-4dde-9985-45282dc99a51) ![Screenshot 2025-01-21 at 14-51-50 mediarr – Home Assistant](https://github.com/user-attachments/assets/4c73b44a-680a-42ea-8d2b-0d96806fb1c6)
 
 **Installation 
+****Sensor Configuration
+ ***see mediarr_sensor must have first https://github.com/Vansmak/mediarr_sensor
+
 HACS Installation 
 
 1. Open HACS
@@ -144,10 +147,8 @@ progress tracking
 ```
 media_player_entity: media_player.your_plex_player
 ```
-**Options
 
-Sensor Configuration
- ***see mediarr_sensor 
+**Options
 
 All entity configurations are optional, use only what you need
 
