@@ -21,11 +21,9 @@ Emby: (may come soon!)
 
 ✅ Media Management
 
-Sonarr: View upcoming TV shows and episodes
+Sonarr: (up to 2 instances) View upcoming TV shows and episodes
 
-Radarr: Track upcoming movie releases
-
-Other Arrs can easily be added
+Radarr: (up to 2 instances) Track upcoming movie releases
 
 ✅ Media Discovery
 
@@ -124,7 +122,13 @@ media_player_entity: media_player.entity # optional for visual of whats currentl
 plex_entity: sensor.plex_mediarr
 jellyfin_entity: sensor.jellyfin_mediarr
 sonarr_entity: sensor.sonarr_mediarr
+sonarr_label: 1st sonarr instance
 radarr_entity: sensor.radarr_mediarr
+radarr_label: 1st radarr instance
+sonarr2_entity: sensor.sonarr2_mediarr
+sonarr2_label: 2nd sonarr instance
+radarr2_entity: sensor.radarr2_mediarr
+radarr2_label: 2nd radarr instance
 seer_entity: sensor.seer_mediarr
 trakt_entity: sensor.trakt_mediarr
 tmdb_entity: sensor.tmdb_mediarr
