@@ -31,7 +31,15 @@ Other Arrs can easily be added
 
 Overseerr / Jellyseer: View     media requests with status and requestor  
 ![request](https://github.com/user-attachments/assets/dc794192-cb27-4d9a-b57c-95dc33d25d22) ![status](https://github.com/user-attachments/assets/6819af31-05c6-4c82-8660-0bf337dcb809)
-!!!!!!!This will not work without the excellent overseer addon by vaparr at https://github.com/vaparr/ha-overseerr!!!!!!!!!!!!!!!
+- View all media requests with their current status
+- Request new movies and TV shows directly from the discover sections
+- **New: Status Management** - Click on any request's status to:
+  - Approve requests
+  - Decline requests
+  - Remove requests from the queue
+- Status changes are instant and sync with Overseerr/Jellyseerr
+- Works seamlessly with both movies and TV shows
+- Uses built-in Home Assistant services for request management
 
 Trakt: Browse popular TV shows and movies
    - may be adding trakt calendar lists, i make no promises.  I do not use trakt
