@@ -1,14 +1,14 @@
-// sections/sonarr-section.js
+// sections/sonarr2-section.js
 import { BaseSection } from './base-section.js';
 
-export class SonarrSection extends BaseSection {
+export class Sonarr2Section extends BaseSection {
   constructor() {
-    super('sonarr', 'Sonarr Shows');  // Default name if no label provided
+    super('sonarr2', 'Sonarr2 Shows');  // Default name if no label provided
   }
 
   generateTemplate(config) {
     // Get label from config or use default
-    const label = config?.sonarr_label ?? 'Upcoming Shows';
+    const label = config?.sonarr2_label ?? 'Sonarr2 Shows';
     return `
       <div class="section" data-section="${this.key}">
         <div class="section-header">
@@ -23,6 +23,7 @@ export class SonarrSection extends BaseSection {
       </div>
     `;
   }
+
 
   updateInfo(cardInstance, item) {
     super.updateInfo(cardInstance, item);  // Handle backgrounds

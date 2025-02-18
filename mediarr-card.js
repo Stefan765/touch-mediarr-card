@@ -6,6 +6,8 @@ import { RadarrSection } from './radarr-section.js';
 import { SeerSection } from './seer-section.js';
 import { TMDBSection } from './tmdb-section.js';
 import { TraktSection } from './trakt-section.js';
+import { Sonarr2Section } from './sonarr2-section.js';
+import { Radarr2Section } from './radarr2-section.js';
 import { styles } from './styles.js';
 
 
@@ -21,7 +23,9 @@ class MediarrCard extends HTMLElement {
       plex: new PlexSection(),
       jellyfin: new JellyfinSection(),
       sonarr: new SonarrSection(),
+      sonarr2: new Sonarr2Section(),
       radarr: new RadarrSection(),
+      radarr2: new Radarr2Section(),
       seer: new SeerSection(),
       tmdb: new TMDBSection(),
       trakt: new TraktSection()
@@ -168,6 +172,8 @@ class MediarrCard extends HTMLElement {
       else if (key === 'jellyfin_entity') sectionKey = 'jellyfin';
       else if (key === 'sonarr_entity') sectionKey = 'sonarr';
       else if (key === 'radarr_entity') sectionKey = 'radarr';
+      else if (key === 'sonarr2_entity') sectionKey = 'sonarr2';
+      else if (key === 'radarr2_entity') sectionKey = 'radarr2';
       else if (key === 'seer_entity') sectionKey = 'seer';
       else if (key === 'trakt_entity') sectionKey = 'trakt';
       else if (key.startsWith('tmdb_')) sectionKey = 'tmdb';
@@ -392,7 +398,13 @@ class MediarrCard extends HTMLElement {
       plex_entity: 'sensor.plex_mediarr',
       jellyfin_entity: 'sensor.jellyfin_mediarr',
       sonarr_entity: 'sensor.sonarr_mediarr',
+      sonarr_label: 'Upcoming Shows',
+      sonarr2_entity: 'sensor.sonarr2_mediarr',
+      sonarr2_label: 'Sonarr2 Shows',
       radarr_entity: 'sensor.radarr_mediarr',
+      radarr_label: 'Upcoming Movies',
+      radarr2_entity: 'sensor.radarr2_mediarr',
+      radarr2_label: 'Radarr2 Movies',
       seer_entity: 'sensor.seer_mediarr',
       seer_trending_entity: 'sensor.seer_mediarr_trending',
       seer_discover_entity: 'sensor.seer_mediarr_discover',

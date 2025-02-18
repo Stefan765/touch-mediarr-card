@@ -1,14 +1,14 @@
-// sections/sonarr-section.js
+// sections/radarr2-section.js
 import { BaseSection } from './base-section.js';
 
-export class SonarrSection extends BaseSection {
+export class Radarr2Section extends BaseSection {
   constructor() {
-    super('sonarr', 'Sonarr Shows');  // Default name if no label provided
+    super('radarr2', 'Radarr2 Shows');  // Default name if no label provided
   }
 
   generateTemplate(config) {
     // Get label from config or use default
-    const label = config?.sonarr_label ?? 'Upcoming Shows';
+    const label = config?.radarr2_label ?? 'Radarr2 Movies';
     return `
       <div class="section" data-section="${this.key}">
         <div class="section-header">
@@ -24,6 +24,7 @@ export class SonarrSection extends BaseSection {
     `;
   }
 
+
   updateInfo(cardInstance, item) {
     super.updateInfo(cardInstance, item);  // Handle backgrounds
     
@@ -33,20 +34,22 @@ export class SonarrSection extends BaseSection {
         return;
     }
 
-    let airDate = '';
-    if (item.release && item.release !== 'Unknown') {
-        const date = new Date(item.release);
+    let releaseDate = '';
+    if (item.release && !item.release.includes('Unknown')) {
+        const dateStr = item.release.split(' - ')[1] || item.release;
+        const date = new Date(dateStr);
         if (!isNaN(date.getTime())) {
-            airDate = date.toLocaleDateString();
+            releaseDate = date.toLocaleDateString();
         }
     }
 
+    const runtime = item.runtime ? `${item.runtime} min` : '';
+
     cardInstance.info.innerHTML = `
-        <div class="title">${item.title}</div>
-        <div class="details">${item.number || ''} - ${item.episode || ''}</div>
-        <div class="metadata">
-            Airs: ${airDate}${item.network ? ` on ${item.network}` : ''}
-        </div>
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        <div class="details">${item.genres || ''}</div>
+        <div class="metadata">${releaseDate}${runtime ? ` | ${runtime}` : ''}</div>
+        ${item.overview ? `<div class="overview">${item.overview}</div>` : ''}
     `;
   }
 
@@ -55,7 +58,7 @@ export class SonarrSection extends BaseSection {
     if (item.title_default) {
       return `
         <div class="empty-section-content">
-          <div class="empty-message">No upcoming shows</div>
+          <div class="empty-message">No upcoming Movies</div>
         </div>
       `;
     }
@@ -66,7 +69,7 @@ export class SonarrSection extends BaseSection {
            data-type="${this.key}"
            data-index="${index}">
         <img src="${item.poster}" alt="${item.title}">
-        <div class="media-item-title">${item.number} - ${item.title}</div>
+        <div class="media-item-title">${item.title}</div>
       </div>
     `;
   }
