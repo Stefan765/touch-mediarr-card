@@ -48,6 +48,7 @@ export class SeerSection extends BaseSection {
     `;
   }
 
+  // In SeerSection class update method
   update(cardInstance, entity) {
     const entityId = entity.entity_id;
     const sectionConfig = this.sections.find(section => 
@@ -56,9 +57,13 @@ export class SeerSection extends BaseSection {
     
     if (!sectionConfig) return;
 
-    const items = entity.attributes.data || [];
-    const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
+    const maxItems = cardInstance.config[`seer_max_items`] || cardInstance.config.max_items || 10;
     
+    let items = entity.attributes.data || [];
+    // Apply the limit from the card config
+    items = items.slice(0, maxItems);
+    
+    const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
     if (!listElement) return;
 
     listElement.innerHTML = items.map((item, index) => 

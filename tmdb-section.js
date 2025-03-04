@@ -30,7 +30,18 @@ export class TMDBSection extends BaseSection {
         </div>
       `).join('');
   }
-
+  // Add this method to TMDBSection class
+  generateMediaItem(item, index, selectedType, selectedIndex, sectionKey) {
+    return `
+      <div class="media-item ${selectedType === sectionKey && index === selectedIndex ? 'selected' : ''}"
+          data-type="${sectionKey}"
+          data-index="${index}">
+        <img src="${item.poster || '/api/placeholder/400/600'}" alt="${item.title || ''}">
+        <div class="media-item-title">${item.title || ''}</div>
+      </div>
+    `;
+  }
+  // In TMDBSection class update method
   update(cardInstance, entity) {
     const entityId = entity.entity_id;
     const sectionConfig = this.sections.find(section => 
@@ -39,10 +50,15 @@ export class TMDBSection extends BaseSection {
     
     if (!sectionConfig) return;
 
+    const maxItems = cardInstance.config[`tmdb_max_items`] || cardInstance.config.max_items || 10;
+    
+    let items = entity.attributes.data || [];
+    // Apply the limit from the card config
+    items = items.slice(0, maxItems);
+    
     const listElement = cardInstance.querySelector(`[data-list="${sectionConfig.key}"]`);
     if (!listElement) return;
 
-    const items = entity.attributes.data || [];
     listElement.innerHTML = items.map((item, index) => 
       this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex, sectionConfig.key)
     ).join('');

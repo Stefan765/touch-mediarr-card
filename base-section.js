@@ -61,8 +61,14 @@ export class BaseSection {
         </div>
     `;
   }
+  // In BaseSection class update method
   update(cardInstance, entity) {
-    const items = entity.attributes.data || [];
+    const maxItems = cardInstance.config[`${this.key}_max_items`] || cardInstance.config.max_items || 10;
+    
+    let items = entity.attributes.data || [];
+    // Apply the limit from the card config
+    items = items.slice(0, maxItems);
+    
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
     if (!listElement) return;
 

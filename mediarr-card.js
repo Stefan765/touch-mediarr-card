@@ -378,7 +378,22 @@ class MediarrCard extends HTMLElement {
       throw new Error('Please define at least one media entity');
     }
     
-    this.config = config;
+    // Set defaults for the new options
+    this.config = {
+      max_items: 10,            // Default max items if not specified
+      days_to_check: 60,        // Default days to check if not specified
+      radarr_release_types: ['Digital', 'Theaters'], // Default to digital and theatrical, exclude physical
+      radarr2_release_types: ['Digital', 'Theaters'],
+      ...config                 // This will override defaults with user config
+    };
+    // Section-specific overrides
+    ['plex', 'jellyfin', 'sonarr', 'sonarr2', 'radarr', 'radarr2', 'seer', 'tmdb', 'trakt'].forEach(section => {
+      this.config[`${section}_max_items`] = this.config[`${section}_max_items`] || this.config.max_items;
+    });
+    
+    ['sonarr', 'sonarr2', 'radarr', 'radarr2'].forEach(section => {
+      this.config[`${section}_days_to_check`] = this.config[`${section}_days_to_check`] || this.config.days_to_check;
+    });
     
     if (config.plex_url && !config.plex_url.endsWith('/')) {
       this._formattedPlexUrl = config.plex_url + '/';
@@ -387,14 +402,31 @@ class MediarrCard extends HTMLElement {
       this._formattedJellyfinUrl = config.jellyfin_url + '/';
     }
   }
+    
 
   static getStubConfig() {
     return {
+      // Default global values
+      max_items: 10,
+      days_to_check: 60,
+      // Release type filtering
+      radarr_release_types: ['Digital', 'Theaters'],
+      radarr2_release_types: ['Digital', 'Theaters'], 
+      // Section-specific overrides
+      tmdb_max_items: 15,
+      seer_max_items: 10,
+      plex_max_items: 10,
+      sonarr_max_items: 10,
+      sonarr_days_to_check: 60,
+      radarr_max_items: 10,
+      radarr_days_to_check: 60,
+      
+      // Existing config
       tmdb_entity: 'sensor.tmdb_mediarr',
-      tmdb_airing_today_entity: 'sensor.tmdb_airing_today_mediarr',
-      tmdb_now_playing_entity: 'sensor.tmdb_now_playing_mediarr',
-      tmdb_on_air_entity: 'sensor.tmdb_on_air_mediarr',
-      tmdb_upcoming_entity: 'sensor.tmdb_upcoming_mediarr',
+      tmdb_airing_today_entity: 'sensor.tmdb_mediarr_airing_today',
+      tmdb_now_playing_entity: 'sensor.tmdb_mediarr_now_playing',
+      tmdb_on_air_entity: 'sensor.tmdb_mediarr_on_air',
+      tmdb_upcoming_entity: 'sensor.tmdb_mediarr_upcoming',
       plex_entity: 'sensor.plex_mediarr',
       jellyfin_entity: 'sensor.jellyfin_mediarr',
       sonarr_entity: 'sensor.sonarr_mediarr',
