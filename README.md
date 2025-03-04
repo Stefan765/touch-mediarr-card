@@ -115,9 +115,11 @@ Step 1: Install and configure the Mediarr Server sensors
 
 Step 2: Add the Card to Lovelace
 
-Add the following YAML to your dashboard:  the order will be the same as you see in the card, dont add too many
+Mediarr Card Configuration Guide
+Basic Configuration
+Add the following YAML to your dashboard. The sections will appear in the same order as they are listed in this configuration:
 ```
-type: custom:mediarr-card 
+type: custom:mediarr-card
 media_player_entity: media_player.entity # optional for visual of whats currently playing
 plex_entity: sensor.plex_mediarr
 jellyfin_entity: sensor.jellyfin_mediarr
@@ -133,30 +135,66 @@ seer_entity: sensor.seer_mediarr
 trakt_entity: sensor.trakt_mediarr
 tmdb_entity: sensor.tmdb_mediarr
 ```
-# Optional Seer lists
+Item Limit Configuration
+Control how many items show in each section:
+```
+# Global settings (applies to all sections)
+max_items: 15  # Show a maximum of 15 items per section
+days_to_check: 30  # For sections that use date filtering (Sonarr/Radarr)
+
+# Section-specific overrides
+plex_max_items: 20  # Override just for Plex section
+sonarr_max_items: 10  # Override just for Sonarr section
+radarr_max_items: 12  # Override just for Radarr section
+tmdb_max_items: 25  # Override just for TMDB sections
+```
+Visual Configuration
+Control the appearance of background images:
+```
+# Controls transparency of background images (0-1)
+# 0 = completely transparent, 1 = fully opaque
+# Recommended: 0.7 for good balance of visibility
+opacity: 0.7
+
+# Optional blur effect for backgrounds (in pixels)
+blur_radius: 5
+```
+Optional Seer Lists
+Additional Seer content sections can be added:
 ```
 seer_trending_entity: sensor.seer_mediarr_trending
 seer_discover_entity: sensor.seer_mediarr_discover
 seer_popular_movies_entity: sensor.seer_mediarr_popular_movies
 seer_popular_tv_entity: sensor.seer_mediarr_popular_tv
 ```
-# Optional TMDB lists
+Optional TMDB Lists
+Additional TMDB content sections can be added:
 ```
+tmdb_airing_today_entity: sensor.tmdb_mediarr_airing_today
 tmdb_now_playing_entity: sensor.tmdb_mediarr_now_playing
 tmdb_upcoming_entity: sensor.tmdb_mediarr_upcoming
 tmdb_on_air_entity: sensor.tmdb_mediarr_on_air
 ```
-# Optional media player for
-progress tracking
+Media Player Integration
+For progress tracking of currently playing media:
 ```
 media_player_entity: media_player.your_plex_player
 ```
+Configuration Options Explained
 
-**Options
+max_items: Controls the maximum number of items displayed in each section. This is useful for limiting the number of items shown in the UI, even if your sensor retrieves more data. Default is 10.
+days_to_check: Applies to Sonarr and Radarr sections. Controls the number of days to look ahead for upcoming releases. Default is 60.
+Section-specific max_items: You can override the global max_items setting for individual sections by adding [section_name]_max_items to your configuration.
+opacity: Controls how transparent the background images appear. A value between 0 and 1:
 
-All entity configurations are optional, use only what you need
+0.5 = 50% transparent (50% opaque)
+0.7 = 30% transparent (70% opaque) - generally provides good readability
+1.0 = 0% transparent (fully opaque)
 
-media_player_entity shows whats playing
+
+blur_radius: Optional setting to add a blur effect to background images, measured in pixels. Higher values create more blur.
+
+Note: All entity configurations are optional. Use only what you need for your setup. The order of entities in your configuration determines the order they appear in the card.
 
 Upcoming Features
 
