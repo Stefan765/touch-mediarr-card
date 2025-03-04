@@ -195,6 +195,7 @@ opacity: Controls how transparent the background images appear. A value between 
 0.5 = 50% transparent (50% opaque)
 0.7 = 30% transparent (70% opaque) - generally provides good readability
 1.0 = 0% transparent (fully opaque)
+
 radarr_release_types: # Exclude physical releases by not including them
   - Digital
   - Theatres
