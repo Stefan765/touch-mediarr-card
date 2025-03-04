@@ -118,6 +118,7 @@ Step 2: Add the Card to Lovelace
 Mediarr Card Configuration Guide
 Basic Configuration
 Add the following YAML to your dashboard. The sections will appear in the same order as they are listed in this configuration:
+Labels are optional 
 ```
 type: custom:mediarr-card
 media_player_entity: media_player.entity # optional for visual of whats currently playing
@@ -127,6 +128,10 @@ sonarr_entity: sensor.sonarr_mediarr
 sonarr_label: 1st sonarr instance
 radarr_entity: sensor.radarr_mediarr
 radarr_label: 1st radarr instance
+radarr_release_types: 
+  - Digital
+  - Theatres
+  - Physical
 sonarr2_entity: sensor.sonarr2_mediarr
 sonarr2_label: 2nd sonarr instance
 radarr2_entity: sensor.radarr2_mediarr
@@ -184,13 +189,16 @@ Configuration Options Explained
 
 max_items: Controls the maximum number of items displayed in each section. This is useful for limiting the number of items shown in the UI, even if your sensor retrieves more data. Default is 10.
 days_to_check: Applies to Sonarr and Radarr sections. Controls the number of days to look ahead for upcoming releases. Default is 60.
-Section-specific max_items: You can override the global max_items setting for individual sections by adding [section_name]_max_items to your configuration.
+Section-specific max_items: You can override the global max_items setting for individual sections by adding [section_name]_max_items to your configuration. 
 opacity: Controls how transparent the background images appear. A value between 0 and 1:
 
 0.5 = 50% transparent (50% opaque)
 0.7 = 30% transparent (70% opaque) - generally provides good readability
 1.0 = 0% transparent (fully opaque)
-
+radarr_release_types: # Exclude physical releases by not including them
+  - Digital
+  - Theatres
+  - Physical
 
 blur_radius: Optional setting to add a blur effect to background images, measured in pixels. Higher values create more blur.
 
