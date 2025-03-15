@@ -228,7 +228,7 @@ export class SeerSection extends BaseSection {
     if (!cardInstance._statusChangeHandlerAdded) {
       cardInstance.addEventListener('change-status', async (e) => {
         const { title, type, request_id } = e.detail;
-
+    
         const modal = document.createElement('div');
         modal.style.position = 'fixed';
         modal.style.top = '50%';
@@ -241,8 +241,11 @@ export class SeerSection extends BaseSection {
         modal.style.borderRadius = '10px';
         modal.style.textAlign = 'center';
         modal.style.zIndex = '1000';
-
+    
         modal.innerHTML = `
+          <div style="position:absolute; top:10px; right:10px; cursor:pointer;" id="close-modal">
+            <ha-icon icon="mdi:close" style="color:white;"></ha-icon>
+          </div>
           <p style="margin-bottom:10px;">Update status for "<strong>${title}</strong>":</p>
           <select id="status-select" style="padding:5px; font-size:16px;">
             <option value="approve">Approve</option>
@@ -250,15 +253,29 @@ export class SeerSection extends BaseSection {
             <option value="remove">Remove</option>
           </select>
           <br><br>
-          <button id="confirm-status" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+          <div style="display:flex; justify-content:center; gap:10px;">
+            <button id="confirm-status" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+            <button id="cancel-status" style="padding:10px 15px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+          </div>
         `;
-
+    
         document.body.appendChild(modal);
-
+    
+        // Add event listener for close button
+        document.getElementById('close-modal').onclick = () => {
+          document.body.removeChild(modal);
+        };
+    
+        // Add event listener for cancel button
+        document.getElementById('cancel-status').onclick = () => {
+          document.body.removeChild(modal);
+        };
+    
+        // Add event listener for confirm button
         document.getElementById('confirm-status').onclick = async () => {
           const new_status = document.getElementById('status-select').value;
           document.body.removeChild(modal);
-
+    
           await window.document.querySelector('home-assistant')
             ?.hass.callService('mediarr', 'update_request', {
               name: title,
@@ -266,7 +283,7 @@ export class SeerSection extends BaseSection {
               new_status: new_status,
               request_id: request_id
             });
-
+    
           // Force a re-render of the current item
           if (typeof cardInstance.selectedIndex !== 'undefined' && cardInstance.selectedType) {
             const items = cardInstance._hass.states[cardInstance.config.seer_entity].attributes.data || [];
@@ -274,7 +291,7 @@ export class SeerSection extends BaseSection {
           }
         };
       });
-
+    
       cardInstance._statusChangeHandlerAdded = true;
     }
 
@@ -323,8 +340,11 @@ export class SeerSection extends BaseSection {
               modal.style.borderRadius = '10px';
               modal.style.textAlign = 'center';
               modal.style.zIndex = '1000';
-    
+          
               modal.innerHTML = `
+                <div style="position:absolute; top:10px; right:10px; cursor:pointer;" id="close-modal">
+                  <ha-icon icon="mdi:close" style="color:white;"></ha-icon>
+                </div>
                 <p style="margin-bottom:10px;">Select season for "<strong>${title}</strong>":</p>
                 <select id="season-select" style="padding:5px; font-size:16px;">
                   <option value="first">First</option>
@@ -332,27 +352,49 @@ export class SeerSection extends BaseSection {
                   <option value="all" selected>All</option>
                 </select>
                 <br><br>
-                <button id="confirm-season" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+                <div style="display:flex; justify-content:center; gap:10px;">
+                  <button id="confirm-season" style="padding:10px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Confirm</button>
+                  <button id="cancel-season" style="padding:10px 15px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+                </div>
               `;
-    
+          
               document.body.appendChild(modal);
-    
+          
+              // Add close functionality to both the X button and Cancel button
+              document.getElementById('close-modal').onclick = () => {
+                document.body.removeChild(modal);
+                resolve(null); // Cancel the operation
+              };
+          
+              document.getElementById('cancel-season').onclick = () => {
+                document.body.removeChild(modal);
+                resolve(null); // Cancel the operation
+              };
+          
               document.getElementById('confirm-season').onclick = () => {
                 const selectedSeason = document.getElementById('season-select').value;
                 document.body.removeChild(modal);
                 resolve(selectedSeason);
               };
-
+          
               window.addEventListener('unhandledrejection', () => {
                 if (document.body.contains(modal)) {
                   document.body.removeChild(modal);
                 }
               }, { once: true });
             });
-    
+          
+            // Check if user cancelled
+            if (season === null) {
+              return; // Exit without making a request
+            }
+          
             data = { name: title, season };
             action = 'mediarr.submit_tv_request';
-          } else if (type.toUpperCase() === 'MOVIE') {
+          }
+    
+            
+            else if (type.toUpperCase() === 'MOVIE') {
             data = { name: title };
             action = 'mediarr.submit_movie_request';
           } else {
