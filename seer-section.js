@@ -38,11 +38,14 @@ export class SeerSection extends BaseSection {
   }
 
   generateMediaItem(item, index, selectedType, selectedIndex, sectionKey) {
+    // Use any available image source
+    const imageUrl = item.poster || item.fanart || item.banner || '/api/placeholder/400/600';
+    
     return `
       <div class="media-item ${selectedType === sectionKey && index === selectedIndex ? 'selected' : ''}"
            data-type="${sectionKey}"
            data-index="${index}">
-        <img src="${item.poster || '/api/placeholder/400/600'}" alt="${item.title || item.name || ''}">
+        <img src="${imageUrl}" alt="${item.title || item.name || ''}">
         <div class="media-item-title">${item.title || item.name || ''}</div>
       </div>
     `;
