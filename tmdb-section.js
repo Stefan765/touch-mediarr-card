@@ -9,7 +9,9 @@ export class TMDBSection extends BaseSection {
       { key: 'tmdb_airing_today', title: 'Airing Today', entityKey: 'tmdb_airing_today_entity', listClass: 'tmdb-airing-today-list' },
       { key: 'tmdb_now_playing', title: 'Now Playing', entityKey: 'tmdb_now_playing_entity', listClass: 'tmdb-now-playing-list' },
       { key: 'tmdb_on_air', title: 'On Air', entityKey: 'tmdb_on_air_entity', listClass: 'tmdb-on-air-list' },
-      { key: 'tmdb_upcoming', title: 'Upcoming', entityKey: 'tmdb_upcoming_entity', listClass: 'tmdb-upcoming-list' }
+      { key: 'tmdb_upcoming', title: 'Upcoming', entityKey: 'tmdb_upcoming_entity', listClass: 'tmdb-upcoming-list' },
+      { key: 'tmdb_popular_movies', title: 'Popular Movies', entityKey: 'tmdb_popular_movies_entity', listClass: 'tmdb-popular-movies-list' },
+      { key: 'tmdb_popular_tv', title: 'Popular TV Shows', entityKey: 'tmdb_popular_tv_entity', listClass: 'tmdb-popular-tv-list' }
     ];
   }
 

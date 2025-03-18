@@ -324,7 +324,15 @@ class MediarrCard extends HTMLElement {
 
     Object.entries(this.sections).forEach(([key, section]) => {
       if (key === 'tmdb') {
-        const entities = ['tmdb_entity', 'tmdb_airing_today_entity', 'tmdb_now_playing_entity', 'tmdb_on_air_entity', 'tmdb_upcoming_entity'];
+        const entities = [
+          'tmdb_entity', 
+          'tmdb_airing_today_entity', 
+          'tmdb_now_playing_entity', 
+          'tmdb_on_air_entity', 
+          'tmdb_upcoming_entity',
+          'tmdb_popular_movies_entity',
+          'tmdb_popular_tv_entity'
+        ];
         entities.forEach(entityKey => {
           const entityId = this.config[entityKey];
           if (entityId && hass.states[entityId]) {
@@ -356,7 +364,9 @@ class MediarrCard extends HTMLElement {
         'tmdb_airing_today_entity',
         'tmdb_now_playing_entity',
         'tmdb_on_air_entity',
-        'tmdb_upcoming_entity'
+        'tmdb_upcoming_entity',
+        'tmdb_popular_movies_entity',
+        'tmdb_popular_tv_entity'
       ],
       seer: [
         'seer_entity',
