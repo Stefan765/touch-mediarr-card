@@ -290,7 +290,79 @@ class MediarrCard extends HTMLElement {
   }
 }
 
+// Nur registrieren, wenn noch nicht vorhanden
 if (!customElements.get('mediarr-card')) {
   customElements.define('mediarr-card', MediarrCard);
 }
+
+// Popup für Long-Press
+window.addEventListener('DOMContentLoaded', () => {
+  const style = document.createElement('style');
+  style.textContent = `
+    .mediarr-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card-background-color, white);
+      color: var(--primary-text-color, black);
+      padding: 16px;
+      border-radius: 8px;
+      z-index: 9999;
+      max-width: 80%;
+      max-height: 70%;
+      overflow: auto;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      display: none;
+    }
+    .mediarr-popup.show { display: block; }
+    .mediarr-popup-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const popup = document.createElement('div');
+  popup.classList.add('mediarr-popup');
+  popup.innerHTML = `<span class="mediarr-popup-close">✖</span><div class="mediarr-popup-content"></div>`;
+  document.body.appendChild(popup);
+
+  const closeBtn = popup.querySelector('.mediarr-popup-close');
+  closeBtn.onclick = () => popup.classList.remove('show');
+
+  // Event delegation: Long-Press auf Medien-Items
+  let pressTimer = null;
+  document.body.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.media-info'); // oder spezifischere Klasse für Filmcover
+    if (!item) return;
+
+    pressTimer = setTimeout(() => {
+      const description = item.dataset.description || 'Keine Beschreibung verfügbar';
+      popup.querySelector('.mediarr-popup-content').textContent = description;
+      popup.classList.add('show');
+    }, 700); // 700ms Long-Press
+  });
+
+  document.body.addEventListener('mouseup', () => {
+    clearTimeout(pressTimer);
+  });
+
+  document.body.addEventListener('mouseleave', () => {
+    clearTimeout(pressTimer);
+  });
+});
+
+// Home Assistant Custom Card Meta
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "mediarr-card",
+  name: "Mediarr Card",
+  description: "A modular card for displaying media from various sources",
+  preview: true
+});
+
 
