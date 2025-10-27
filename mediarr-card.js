@@ -290,4 +290,7 @@ class MediarrCard extends HTMLElement {
   }
 }
 
-customElements.define('mediarr-card', MediarrCard);
+if (!customElements.get('mediarr-card')) {
+  customElements.define('mediarr-card', MediarrCard);
+}
+
