@@ -545,4 +545,25 @@ export const styles = `
     font-size: 0.9em;
     color: var(--primary-text-color, #000);
 }
+.jellyfin-title {
+  color: white;
+  font-weight: bold;
+  font-size: 1em;
+  margin-bottom: 2px;
+}
+
+.jellyfin-description {
+  color: white;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.jellyfin-type {
+  color: white;
+  font-size: 0.85em;
+}
+
 `;
