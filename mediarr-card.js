@@ -1,55 +1,51 @@
-// main-card.js
-import { PlexSection } from './plex-section.js';
-import { JellyfinSection } from './jellyfin-section.js';
-import { SonarrSection } from './sonarr-section.js';
-import { RadarrSection } from './radarr-section.js';
-import { SeerSection } from './seer-section.js';
-import { TMDBSection } from './tmdb-section.js';
-import { TraktSection } from './trakt-section.js';
-import { Sonarr2Section } from './sonarr2-section.js';
-import { Radarr2Section } from './radarr2-section.js';
-import { styles } from './styles.js';
-
 class MediarrCard extends HTMLElement {
   constructor() {
     super();
-    this.selectedType = null;
-    this.selectedIndex = 0;
-    this.collapsedSections = new Set();
-    this.progressInterval = null;
-
-    this.sections = {
-      plex: new PlexSection(),
-      jellyfin: new JellyfinSection(),
-      sonarr: new SonarrSection(),
-      sonarr2: new Sonarr2Section(),
-      radarr: new RadarrSection(),
-      radarr2: new Radarr2Section(),
-      seer: new SeerSection(),
-      tmdb: new TMDBSection(),
-      trakt: new TraktSection()
-    };
+    this.config = null;
+    this._hass = null;
+    this._initialized = false;
   }
 
-  // 🟢 Wichtig: Home Assistant ruft diese Methode auf, um die Konfiguration zu setzen
   setConfig(config) {
     if (!config) throw new Error("No configuration provided");
     this.config = config;
     if (this.isConnected) this.initializeCard(this._hass);
   }
 
-  // 🟢 Wird jedes Mal aufgerufen, wenn sich HA-Daten ändern
   set hass(hass) {
     this._hass = hass;
     if (!this._initialized && this.config) {
       this.initializeCard(hass);
       this._initialized = true;
     }
-
-    // Optional: Update "Now Playing"
-    const plexEntity = this.config?.plex_entity ? hass.states[this.config.plex_entity] : null;
-    if (plexEntity) this._updateNowPlaying(plexEntity);
   }
+
+  initializeCard(hass) {
+    this.innerHTML = `
+      <ha-card header="🎬 Mediarr Card">
+        <div style="padding:16px;">
+          <p><b>Config geladen:</b></p>
+          <pre>${JSON.stringify(this.config, null, 2)}</pre>
+          <p><b>Entities erkannt:</b> ${Object.keys(hass.states).length}</p>
+          <p>✅ Karte wurde korrekt initialisiert!</p>
+        </div>
+      </ha-card>
+    `;
+  }
+}
+
+if (!customElements.get('mediarr-card')) {
+  customElements.define('mediarr-card', MediarrCard);
+}
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "mediarr-card",
+  name: "Mediarr Card",
+  description: "Eine modulare Medienkarte",
+  preview: true
+});
+
 
   async _getPlexClients(plexUrl, plexToken) {
     try {
