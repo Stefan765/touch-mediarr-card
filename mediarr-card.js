@@ -31,6 +31,21 @@ class MediarrCard extends HTMLElement {
     };
   }
 
+  setConfig(config) {
+    if (!config) throw new Error("No configuration provided");
+    this.config = config;
+    if (this.isConnected) this.initializeCard(this._hass);
+  }
+  
+  set hass(hass) {
+    this._hass = hass;
+    if (!this._initialized && this.config) {
+      this.initializeCard(hass);
+      this._initialized = true;
+    }
+  }
+
+
   async _getPlexClients(plexUrl, plexToken) {
     try {
       const response = await fetch(`${plexUrl}/clients?X-Plex-Token=${plexToken}`);
