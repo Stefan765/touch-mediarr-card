@@ -1,25 +1,5 @@
 // styles.js
 export const styles = `
-   .jellyfin-title {
-    color: white;
-    font-weight: bold;
-    font-size: 1em;
-    margin-bottom: 2px;
-  }
-
-  .jellyfin-description {
-    color: white;
-    font-size: 0.9em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 2px;
-  }
-
-  .jellyfin-type {
-    color: white;
-    font-size: 0.85em;
-  }
   :root {
     --card-padding: 0;
     --section-spacing: 8px;
@@ -201,84 +181,64 @@ export const styles = `
 
   /* Media Items */
   .media-item {
-     flex: 0 0 auto;
-     width: 100px;
-     height: 150px;
-     position: relative;
-     cursor: pointer;
-     border-radius: 8px;
-     overflow: hidden;
-     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-     transition: transform 0.3s ease, box-shadow 0.3s ease;
-     margin: 0 4px;
-   }
-   
-   .media-item:hover {
-     transform: translateY(-4px) scale(1.05);
-     box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-   }
-   
-   .media-item img {
-     width: 100%;
-     height: 100%;
-     object-fit: cover;
-     border-radius: 8px;
-   }
+    flex: 0 0 auto;
+    width: 85px;
+    height: 135px;
+    position: relative;
+    cursor: pointer;
+    transform: translateY(0);
+    transition: transform var(--transition-duration) ease-out, 
+                box-shadow var(--transition-duration) ease-out;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin: 0px 2px;
+  }
 
-   /* Overlay für Gradient + Text */
-   .media-item-info {
-     position: absolute;
-     bottom: 0;
-     left: 0;
-     right: 0;
-     padding: 8px;
-     display: flex;
-     flex-direction: column;
-     justify-content: flex-end;
-     z-index: 2;
-   }
-   
-   .media-item-gradient {
-     position: absolute;
-     bottom: 0;
-     left: 0;
-     right: 0;
-     height: 60%;
-     background: linear-gradient(transparent, rgba(0,0,0,0.8));
-     border-bottom-left-radius: 8px;
-     border-bottom-right-radius: 8px;
-     z-index: 1;
-   }
-   
-   /* Text-Stile */
-   .jellyfin-title {
-     color: white;
-     font-weight: bold;
-     font-size: 1em;
-     margin-bottom: 2px;
-     z-index: 2;
-     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-   }
-   
-   .jellyfin-description {
-     color: white;
-     font-size: 0.85em;
-     margin-bottom: 2px;
-     display: -webkit-box;
-     -webkit-line-clamp: 2;
-     -webkit-box-orient: vertical;
-     overflow: hidden;
-     z-index: 2;
-     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-   }
-   
-   .jellyfin-type {
-     color: white;
-     font-size: 0.75em;
-     z-index: 2;
-     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-   }
-   
+  .media-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+
+  .media-item.selected {
+    box-shadow: 0 0 0 2px var(--primary-color);
+  }
+
+  .media-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .media-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    pointer-events: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+
+  .media-item-title {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    font-size: 0.75em;
+    color: white;
+    z-index: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    font-weight: 500;
+  }
 
   /* Content Typography */
   .title {
