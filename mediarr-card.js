@@ -1,182 +1,109 @@
 // main-card.js
+import { LitElement, html, css } from 'https://unpkg.com/lit@2.6.1/index.js?module';
 import { styles } from './styles.js';
 
-class EmbyCard extends HTMLElement {
+class EmbyCard extends LitElement {
+  static get properties() {
+    return {
+      config: { type: Object },
+      movies: { type: Array },
+      series: { type: Array },
+      clients: { type: Array },
+      modalOpen: { type: Boolean }
+    };
+  }
+
   constructor() {
     super();
-    this.embyMovies = [];
-    this.embySeries = [];
+    this.movies = [];
+    this.series = [];
+    this.clients = [];
+    this.modalOpen = false;
   }
 
-  async _getEmbyClients(embyUrl, embyToken) {
-    try {
-      const response = await fetch(`${embyUrl}/Sessions?api_key=${embyToken}`);
-      if (!response.ok) throw new Error('Failed to fetch Emby sessions');
+  static styles = css([styles]);
 
-      const data = await response.json();
-      return data.map(session => ({
-        name: session.NowPlayingItem?.Name || session.UserName,
-        client: session.Client,
-        userId: session.UserId,
-        sessionId: session.SessionId
-      }));
-    } catch (error) {
-      console.error('Error fetching Emby clients:', error);
-      return [];
+  setConfig(config) {
+    if (!config) throw new Error('Invalid configuration');
+    this.config = config;
+    this.fetchMedia();
+  }
+
+  async fetchMedia() {
+    try {
+      const moviesResp = await fetch(`${this.config.embyUrl}/Movies?api_key=${this.config.apiKey}`);
+      const seriesResp = await fetch(`${this.config.embyUrl}/Shows?api_key=${this.config.apiKey}`);
+      this.movies = (await moviesResp.json()).Items || [];
+      this.series = (await seriesResp.json()).Items || [];
+    } catch (e) {
+      console.error('Error fetching Emby media:', e);
     }
   }
 
-  async _showClientSelector(mediaItem) {
-    const embyUrl = this._formattedEmbyUrl || this.config.emby_url;
-    const embyToken = this.config.emby_token;
+  toggleModal() {
+    this.modalOpen = !this.modalOpen;
+  }
 
-    const clients = await this._getEmbyClients(embyUrl, embyToken);
-    const modal = this.querySelector('.client-modal');
-    const clientList = this.querySelector('.client-list');
+  playOnClient(item, client) {
+    console.log('Play', item.Name, 'on', client.Name);
+    // Beispiel: Emby API Call zum Abspielen
+    fetch(`${this.config.embyUrl}/Sessions/${client.Id}/Playing?itemId=${item.Id}&api_key=${this.config.apiKey}`, { method: 'POST' });
+    this.toggleModal();
+  }
 
-    if (clients.length === 0) {
-      clientList.innerHTML = `<div style="padding: 16px; text-align: center;">No available clients</div>`;
-    } else {
-      clientList.innerHTML = clients.map(client => `
-        <div class="client-item" data-session-id="${client.sessionId}">
-          <div class="client-item-name">${client.name} (${client.client})</div>
+  renderMedia(items) {
+    return html`
+      <div class="media-scroll">
+        ${items.map(item => html`
+          <div class="media-item" @click="${() => this.toggleModal(item)}">
+            <div class="media-thumb" style="background-image: url(${this.config.embyUrl}/Items/${item.Id}/Images/Primary?api_key=${this.config.apiKey})">
+              <div class="play-button"><ha-icon icon="mdi:play"></ha-icon></div>
+            </div>
+            <div class="media-title">${item.Name}</div>
+          </div>
+        `)}
+      </div>
+    `;
+  }
+
+  renderModal() {
+    return html`
+      <div class="client-modal ${this.modalOpen ? '' : 'hidden'}" @click="${this.toggleModal}">
+        <div class="client-modal-content" @click="${e => e.stopPropagation()}">
+          <div class="client-modal-header">
+            <div class="client-modal-title">Wähle ein Gerät</div>
+            <div class="client-modal-close" @click="${this.toggleModal}">✖</div>
+          </div>
+          <div class="client-list">
+            ${this.clients.map(client => html`
+              <div class="client-item" @click="${() => this.playOnClient(this.selectedItem, client)}">
+                <div class="client-item-name">${client.Name}</div>
+              </div>
+            `)}
+          </div>
         </div>
-      `).join('');
-
-      this.querySelectorAll('.client-item').forEach(item => {
-        item.onclick = () => {
-          const sessionId = item.dataset.sessionId;
-          this._playOnEmbyClient(sessionId, mediaItem.Id);
-          modal.classList.add('hidden');
-        };
-      });
-    }
-
-    modal.classList.remove('hidden');
-  }
-
-  async _playOnEmbyClient(sessionId, itemId) {
-    try {
-      const embyUrl = this._formattedEmbyUrl || this.config.emby_url;
-      const embyToken = this.config.emby_token;
-      await fetch(`${embyUrl}/Sessions/${sessionId}/Playing?ItemId=${itemId}&api_key=${embyToken}`, {
-        method: 'POST'
-      });
-    } catch (error) {
-      console.error('Error starting playback on Emby client:', error);
-    }
-  }
-
-  _renderMediaItems() {
-    const movieContainer = this.querySelector('.movies-items');
-    const seriesContainer = this.querySelector('.series-items');
-    if (!movieContainer || !seriesContainer) return;
-
-    movieContainer.innerHTML = this.embyMovies.map(item => `
-      <div class="media-item">
-        <div class="media-thumb" style="background-image: url('${this.config.emby_url}/Items/${item.Id}/Images/Primary?api_key=${this.config.emby_token}')"></div>
-        <div class="media-title">${item.Name}</div>
-        <div class="play-button" data-id="${item.Id}"><ha-icon icon="mdi:play-circle-outline"></ha-icon></div>
       </div>
-    `).join('');
-
-    seriesContainer.innerHTML = this.embySeries.map(item => `
-      <div class="media-item">
-        <div class="media-thumb" style="background-image: url('${this.config.emby_url}/Items/${item.Id}/Images/Primary?api_key=${this.config.emby_token}')"></div>
-        <div class="media-title">${item.Name}</div>
-        <div class="play-button" data-id="${item.Id}"><ha-icon icon="mdi:play-circle-outline"></ha-icon></div>
-      </div>
-    `).join('');
-
-    // Play-Buttons
-    this.querySelectorAll('.play-button').forEach(btn => {
-      btn.onclick = async () => {
-        const mediaId = btn.dataset.id;
-        const mediaItem = [...this.embyMovies, ...this.embySeries].find(m => m.Id === mediaId);
-        if (mediaItem) await this._showClientSelector(mediaItem);
-      };
-    });
+    `;
   }
 
-  initializeCard(hass) {
-    this.innerHTML = `
+  render() {
+    return html`
       <ha-card>
         <div class="card-background"></div>
         <div class="card-content">
-
-          <div class="client-modal hidden">
-            <div class="client-modal-content">
-              <div class="client-modal-header">
-                <div class="client-modal-title">Select Client</div>
-                <ha-icon class="client-modal-close" icon="mdi:close"></ha-icon>
-              </div>
-              <div class="client-list"></div>
-            </div>
-          </div>
-
           <div class="media-section">
-            <div class="media-section-title">Movies</div>
-            <div class="media-scroll">
-              <div class="movies-items"></div>
-            </div>
+            <div class="media-section-title">Filme</div>
+            ${this.renderMedia(this.movies)}
           </div>
-
           <div class="media-section">
-            <div class="media-section-title">Series</div>
-            <div class="media-scroll">
-              <div class="series-items"></div>
-            </div>
+            <div class="media-section-title">Serien</div>
+            ${this.renderMedia(this.series)}
           </div>
-
         </div>
       </ha-card>
+      ${this.renderModal()}
     `;
-
-    const style = document.createElement('style');
-    style.textContent = styles;
-    this.appendChild(style);
-
-    const closeButton = this.querySelector('.client-modal-close');
-    const modal = this.querySelector('.client-modal');
-    closeButton.onclick = () => modal.classList.add('hidden');
-    modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
-  }
-
-  set hass(hass) {
-    if (!this.embyMovies && !this.embySeries) this.initializeCard(hass);
-
-    if (this.config.emby_entity && hass.states[this.config.emby_entity]) {
-      const data = hass.states[this.config.emby_entity].attributes.data || [];
-      this.embyMovies = data.filter(item => item.Type === 'Movie');
-      this.embySeries = data.filter(item => item.Type === 'Series');
-      this._renderMediaItems();
-    }
-  }
-
-  setConfig(config) {
-    if (!config.emby_entity) throw new Error('Please define an Emby entity');
-    this.config = { ...config };
-
-    if (config.emby_url && !config.emby_url.endsWith('/')) {
-      this._formattedEmbyUrl = config.emby_url + '/';
-    }
-  }
-
-  static getStubConfig() {
-    return {
-      emby_entity: 'sensor.emby_mediarr',
-      emby_url: 'http://your-emby-server:8096',
-      emby_token: '',
-    };
   }
 }
 
 customElements.define('emby-card', EmbyCard);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "emby-card",
-  name: "Emby Card",
-  description: "A scrollable card for displaying Emby movies and series",
-  preview: true
-});
