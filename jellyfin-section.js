@@ -1,14 +1,49 @@
 // sections/jellyfin-section.js
 import { BaseSection } from './base-section.js';
 
-export class JellyfinSection extends BaseSection {
-  constructor() {
-    super('jellyfin', 'Jellyfin Recently Added');
+export class JellyfinSection {
+  generateTemplate(config) {
+    return `
+      <div class="section" data-section="jellyfin">
+        <div class="section-header">
+          <span>${config.jellyfin_label || 'Jellyfin'}</span>
+          <ha-icon class="section-toggle-icon" icon="mdi:chevron-down"></ha-icon>
+        </div>
+        <div class="section-content">
+          <div class="jellyfin-item">
+            <div class="jellyfin-title"></div>
+            <div class="jellyfin-description"></div>
+            <div class="jellyfin-type"></div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
-  updateInfo(cardInstance, item) {
-    // First handle backgrounds using base class logic
-    super.updateInfo(cardInstance, item);
+  update(card, entity) {
+    if (!entity || !entity.attributes?.data || entity.attributes.data.length === 0) return;
+    const item = entity.attributes.data[0];
+
+    const titleEl = card.querySelector('.jellyfin-title');
+    const descEl = card.querySelector('.jellyfin-description');
+    const typeEl = card.querySelector('.jellyfin-type');
+
+    if (titleEl) titleEl.innerHTML = `<b>${item.title || ''}</b>`;
+    if (descEl) descEl.textContent = item.overview || item.plot || '';
+    if (typeEl) typeEl.textContent = item.type || '';
+  }
+
+  updateInfo(card, data) {
+    const titleEl = card.querySelector('.jellyfin-title');
+    const descEl = card.querySelector('.jellyfin-description');
+    const typeEl = card.querySelector('.jellyfin-type');
+
+    if (titleEl) titleEl.innerHTML = `<b>${data.title || ''}</b>`;
+    if (descEl) descEl.textContent = data.overview || data.plot || '';
+    if (typeEl) typeEl.textContent = data.type || '';
+  }
+}
+
     
     if (!item) return;
 
