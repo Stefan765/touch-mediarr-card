@@ -17,7 +17,7 @@ class MediarrCard extends HTMLElement {
     this.selectedIndex = 0;
     this.collapsedSections = new Set();
     this.progressInterval = null;
-  
+
     this.sections = {
       plex: new PlexSection(),
       jellyfin: new JellyfinSection(),
@@ -31,30 +31,35 @@ class MediarrCard extends HTMLElement {
     };
   }
 
+  // 🟢 Wichtig: Home Assistant ruft diese Methode auf, um die Konfiguration zu setzen
   setConfig(config) {
     if (!config) throw new Error("No configuration provided");
     this.config = config;
     if (this.isConnected) this.initializeCard(this._hass);
   }
-  
+
+  // 🟢 Wird jedes Mal aufgerufen, wenn sich HA-Daten ändern
   set hass(hass) {
     this._hass = hass;
     if (!this._initialized && this.config) {
       this.initializeCard(hass);
       this._initialized = true;
     }
-  }
 
+    // Optional: Update "Now Playing"
+    const plexEntity = this.config?.plex_entity ? hass.states[this.config.plex_entity] : null;
+    if (plexEntity) this._updateNowPlaying(plexEntity);
+  }
 
   async _getPlexClients(plexUrl, plexToken) {
     try {
       const response = await fetch(`${plexUrl}/clients?X-Plex-Token=${plexToken}`);
       if (!response.ok) throw new Error('Failed to fetch clients');
-      
+
       const text = await response.text();
       const parser = new DOMParser();
       const xml = parser.parseFromString(text, 'text/xml');
-      
+
       return Array.from(xml.querySelectorAll('Server')).map(server => ({
         name: server.getAttribute('name'),
         product: server.getAttribute('product'),
@@ -70,16 +75,16 @@ class MediarrCard extends HTMLElement {
   async _showClientSelector(mediaItem) {
     const plexUrl = this._formattedPlexUrl || this.config.plex_url;
     const plexToken = this.config.plex_token;
-    
+
     if (!plexUrl || !plexToken) {
       console.error('Plex URL or token not available');
       return;
     }
-    
+
     const clients = await this._getPlexClients(plexUrl, plexToken);
     const modal = this.querySelector('.client-modal');
     const clientList = this.querySelector('.client-list');
-    
+
     if (clients.length === 0) {
       clientList.innerHTML = `
         <div style="padding: 16px; text-align: center;">
@@ -99,7 +104,7 @@ class MediarrCard extends HTMLElement {
           </div>
         </div>
       `).join('');
-      
+
       this.querySelectorAll('.client-item').forEach(item => {
         item.onclick = async () => {
           const clientId = item.dataset.clientId;
@@ -110,7 +115,7 @@ class MediarrCard extends HTMLElement {
         };
       });
     }
-    
+
     modal.classList.remove('hidden');
   }
 
@@ -136,7 +141,7 @@ class MediarrCard extends HTMLElement {
 
     const content = section.querySelector('.section-content');
     const icon = section.querySelector('.section-toggle-icon');
-    
+
     if (this.collapsedSections.has(sectionKey)) {
       this.collapsedSections.delete(sectionKey);
       content.classList.remove('collapsed');
@@ -157,32 +162,27 @@ class MediarrCard extends HTMLElement {
     this.nowPlaying.classList.remove('hidden');
     this.nowPlayingTitle.textContent = entity.attributes.media_title || '';
     this.nowPlayingSubtitle.textContent = entity.attributes.media_series_title || '';
-    
+
     if (entity.attributes.media_position && entity.attributes.media_duration) {
       const progress = (entity.attributes.media_position / entity.attributes.media_duration) * 100;
       this.progressBar.style.width = `${progress}%`;
     }
-    
+
     if (entity.attributes.entity_picture) {
-      this.querySelector('.now-playing-background').style.backgroundImage = 
+      this.querySelector('.now-playing-background').style.backgroundImage =
         `url('${entity.attributes.entity_picture}')`;
     }
   }
 
   initializeCard(hass) {
-    this._hass = hass; // Speichern, um im Popup auf States zuzugreifen
+    this._hass = hass;
 
-    // Konfigurationsreihenfolge
     const configKeys = Object.keys(this.config)
-      .filter(key => 
-        key.endsWith('_entity') && 
-        this.config[key] && 
-        this.config[key].length > 0
-      );
-    
+      .filter(key => key.endsWith('_entity') && this.config[key]?.length > 0);
+
     const orderedSections = configKeys.reduce((sections, key) => {
       let sectionKey = null;
-     
+
       if (key === 'plex_entity') sectionKey = 'plex';
       else if (key === 'jellyfin_entity') sectionKey = 'jellyfin';
       else if (key === 'sonarr_entity') sectionKey = 'sonarr';
@@ -192,15 +192,13 @@ class MediarrCard extends HTMLElement {
       else if (key === 'seer_entity') sectionKey = 'seer';
       else if (key === 'trakt_entity') sectionKey = 'trakt';
       else if (key.startsWith('tmdb_')) sectionKey = 'tmdb';
- 
-      if (sectionKey && !sections.includes(sectionKey)) {
-        sections.push(sectionKey);
-      }
+
+      if (sectionKey && !sections.includes(sectionKey)) sections.push(sectionKey);
       return sections;
     }, []);
-  
-    this.innerHTML =
-      `<ha-card>
+
+    this.innerHTML = `
+      <ha-card>
         <div class="card-background"></div>
         <div class="card-content">
           <div class="client-modal hidden">
@@ -222,7 +220,7 @@ class MediarrCard extends HTMLElement {
               <div class="description-text"></div>
             </div>
           </div>
-         
+
           <div class="now-playing hidden">
             <div class="now-playing-background"></div>
             <div class="now-playing-content">
@@ -235,7 +233,7 @@ class MediarrCard extends HTMLElement {
               <div class="progress-bar-fill"></div>
             </div>
           </div>
-         
+
           <div class="media-content">
             <div class="media-background"></div>
             <div class="media-info"></div>
@@ -243,16 +241,14 @@ class MediarrCard extends HTMLElement {
               <ha-icon class="play-icon" icon="mdi:play-circle-outline"></ha-icon>
             </div>
           </div>
-         
+
           ${orderedSections
-            .map(key => {
-              const section = this.sections[key];
-              return section.generateTemplate(this.config);
-            })
-            .join('')}            
+            .map(key => this.sections[key]?.generateTemplate(this.config) || '')
+            .join('')}
         </div>
-      </ha-card>`;
-  
+      </ha-card>
+    `;
+
     this.content = this.querySelector('.media-content');
     this.background = this.querySelector('.media-background');
     this.cardBackground = this.querySelector('.card-background');
@@ -263,7 +259,6 @@ class MediarrCard extends HTMLElement {
     this.nowPlayingSubtitle = this.querySelector('.now-playing-subtitle');
     this.progressBar = this.querySelector('.progress-bar-fill');
 
-    // Event-Listener
     this._initializeEventListeners(hass);
   }
 
@@ -271,7 +266,6 @@ class MediarrCard extends HTMLElement {
     const modalClose = this.querySelector('.client-modal-close');
     if (modalClose) modalClose.onclick = () => this.querySelector('.client-modal').classList.add('hidden');
 
-    // Long Press für Description Popup
     let pressTimer;
     this.content.onmousedown = () => {
       pressTimer = setTimeout(() => this._showDescriptionPopup(), 600);
@@ -287,89 +281,25 @@ class MediarrCard extends HTMLElement {
     let data;
     if (this.selectedType && this.sections[this.selectedType]) {
       const entityId = this.config[`${this.selectedType}_entity`];
-      const hassStates = this._hass ? this._hass.states : null;
+      const hassStates = this._hass?.states;
       if (entityId && hassStates && hassStates[entityId]) {
         data = hassStates[entityId].attributes.data?.[this.selectedIndex];
       }
     }
 
     if (!data) return;
-
     descriptionText.textContent = data.overview || data.description || "No description available";
 
     modal.classList.remove('hidden');
-
-    const closeButton = modal.querySelector('.description-modal-close');
-    closeButton.onclick = () => modal.classList.add('hidden');
+    modal.querySelector('.description-modal-close').onclick = () => modal.classList.add('hidden');
     modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
   }
 }
 
-// Nur registrieren, wenn noch nicht vorhanden
+// Registrieren, falls noch nicht geschehen
 if (!customElements.get('mediarr-card')) {
   customElements.define('mediarr-card', MediarrCard);
 }
-
-// Popup für Long-Press
-window.addEventListener('DOMContentLoaded', () => {
-  const style = document.createElement('style');
-  style.textContent = `
-    .mediarr-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--card-background-color, white);
-      color: var(--primary-text-color, black);
-      padding: 16px;
-      border-radius: 8px;
-      z-index: 9999;
-      max-width: 80%;
-      max-height: 70%;
-      overflow: auto;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-      display: none;
-    }
-    .mediarr-popup.show { display: block; }
-    .mediarr-popup-close {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  `;
-  document.head.appendChild(style);
-
-  const popup = document.createElement('div');
-  popup.classList.add('mediarr-popup');
-  popup.innerHTML = `<span class="mediarr-popup-close">✖</span><div class="mediarr-popup-content"></div>`;
-  document.body.appendChild(popup);
-
-  const closeBtn = popup.querySelector('.mediarr-popup-close');
-  closeBtn.onclick = () => popup.classList.remove('show');
-
-  // Event delegation: Long-Press auf Medien-Items
-  let pressTimer = null;
-  document.body.addEventListener('mousedown', (e) => {
-    const item = e.target.closest('.media-info'); // oder spezifischere Klasse für Filmcover
-    if (!item) return;
-
-    pressTimer = setTimeout(() => {
-      const description = item.dataset.description || 'Keine Beschreibung verfügbar';
-      popup.querySelector('.mediarr-popup-content').textContent = description;
-      popup.classList.add('show');
-    }, 700); // 700ms Long-Press
-  });
-
-  document.body.addEventListener('mouseup', () => {
-    clearTimeout(pressTimer);
-  });
-
-  document.body.addEventListener('mouseleave', () => {
-    clearTimeout(pressTimer);
-  });
-});
 
 // Home Assistant Custom Card Meta
 window.customCards = window.customCards || [];
@@ -379,5 +309,3 @@ window.customCards.push({
   description: "A modular card for displaying media from various sources",
   preview: true
 });
-
-
