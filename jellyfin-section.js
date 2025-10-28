@@ -76,13 +76,19 @@ export class JellyfinSection {
     }
 
     // Use original media item layout
-    return `
-      <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
-           data-type="${this.key}"
-           data-index="${index}">
-        <img src="${item.poster}" alt="${item.title}">
-        <div class="media-item-title">${item.title}</div>
+    <div class="media-item">
+      <img src="FILM_BILD_URL" alt="FILMTITEL" />
+    
+      <!-- Info Overlay -->
+      <div class="media-item-info">
+        <div class="media-item-gradient"></div>
+        <div class="jellyfin-title">FILMTITEL</div>
+        <div class="jellyfin-description">
+          Hier steht die kurze Filmbeschreibung. Sie kann bis zu zwei Zeilen lang sein und wird dann abgeschnitten.
+        </div>
+        <div class="jellyfin-type">Film</div>
       </div>
+    </div>
     `;
   }
 }
