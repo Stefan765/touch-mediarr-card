@@ -390,7 +390,7 @@ class MediarrCard extends HTMLElement {
     
     // Set defaults for the new options
     this.config = {
-      max_items: 10,            // Default max items if not specified
+      max_items: 20,            // Default max items if not specified
       days_to_check: 60,        // Default days to check if not specified
       radarr_release_types: ['Digital', 'Theaters'], // Default to digital and theatrical, exclude physical
       radarr2_release_types: ['Digital', 'Theaters'],
@@ -417,7 +417,7 @@ class MediarrCard extends HTMLElement {
   static getStubConfig() {
     return {
       // Default global values
-      max_items: 10,
+      max_items: 20,
       days_to_check: 60,
       // Release type filtering
       radarr_release_types: ['Digital', 'Theaters'],
