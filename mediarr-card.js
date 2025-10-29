@@ -1,8 +1,8 @@
 // main-card.js
 import { PlexSection } from './plex-section.js';
 import { JellyfinSection } from './jellyfin-section.js';
-import { SonarrSection } from './sonarr-section.js';
-import { RadarrSection } from './radarr-section.js';
+import { embyMoviesSection } from './sections/emby-movies-section.js';
+import { embySeriesSection } from './sections/emby-series-section.js';
 import { SeerSection } from './seer-section.js';
 import { TMDBSection } from './tmdb-section.js';
 import { TraktSection } from './trakt-section.js';
