@@ -1,21 +1,24 @@
-// sections/emby-section.js
+// sections/jellyfin-section.js
 import { BaseSection } from './base-section.js';
 
-export class EmbySection extends BaseSection {
+export class JellyfinSection extends BaseSection {
   constructor() {
-    super('emby', 'Emby Neueste Filme');
+    super('jellyfin', 'Emby Neueste Filme');
   }
 
   updateInfo(cardInstance, item) {
+    // First handle backgrounds using base class logic
     super.updateInfo(cardInstance, item);
-
+    
     if (!item) return;
 
+    // Check for empty state and clear the info if the item has a default title
     if (item.title_default) {
       cardInstance.info.innerHTML = '';
       return;
     }
 
+    // Then add Jellyfin-specific info display
     const addedDate = item.release ? new Date(item.release).toLocaleDateString() : 'Unknown';
     const runtime = item.runtime ? `${item.runtime} min` : '';
     const subtitle = item.episode ? `${item.number || ''} - ${item.episode || ''}` : '';
@@ -28,6 +31,7 @@ export class EmbySection extends BaseSection {
   }
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    // Handle empty state
     if (item.title_default) {
       return `
         <div class="empty-section-content">
@@ -36,6 +40,7 @@ export class EmbySection extends BaseSection {
       `;
     }
 
+    // Use original media item layout
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -44,26 +49,5 @@ export class EmbySection extends BaseSection {
         <div class="media-item-title">${item.title}</div>
       </div>
     `;
-  }
-
-  generateTemplate(config) {
-    return `
-      <div class="section" data-section="${this.key}">
-        <div class="section-header">
-          <div class="section-title">${this.title}</div>
-        </div>
-        <div class="section-content horizontal-scroll"></div>
-      </div>
-    `;
-  }
-
-  update(cardInstance, entity) {
-    const container = cardInstance.querySelector(`[data-section="${this.key}"] .section-content`);
-    if (!container) return;
-
-    const items = entity.attributes.data || [];
-    container.innerHTML = items.slice(0, cardInstance.config.emby_max_items || 10)
-      .map((item, index) => this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex))
-      .join('');
   }
 }
