@@ -3,7 +3,7 @@ import { BaseSection } from './base-section.js';
 
 export class RadarrSection extends BaseSection {
   constructor() {
-    super('radarr', 'Radarr Movies', 'Emby Neueste Serien');
+    super('radarr', 'Emby Neueste Serien');
   }
 
   updateInfo(cardInstance, item) {
