@@ -2,78 +2,90 @@
 class MediarrCard extends HTMLElement {
   constructor() {
     super();
-    this.selectedIndex = 0;
-    this.sections = {
-      emby_movies: { entityKey: 'emby_movies_entity', title: 'Filme' },
-      emby_series: { entityKey: 'emby_series_entity', title: 'Serien' }
-    };
+    this.attachShadow({ mode: 'open' });
+    this.selectedType = null;
+    this.selectedIndex = null;
   }
 
   setConfig(config) {
     if (!config.emby_movies_entity && !config.emby_series_entity) {
-      throw new Error('Please define at least one Emby media entity');
+      throw new Error('Please define at least one Emby entity');
     }
-    this.config = config;
-    this.maxItems = config.max_items || 10;
+
+    this.config = {
+      emby_max_items: 10,
+      ...config
+    };
+
+    this.sections = {
+      movies: new EmbySection('Movies', config.emby_movies_entity),
+      series: new EmbySection('Series', config.emby_series_entity)
+    };
   }
 
   set hass(hass) {
-    if (!this.content) this._buildCard();
+    this.hassState = hass;
 
-    Object.entries(this.sections).forEach(([key, section]) => {
-      const entityId = this.config[section.entityKey];
-      if (entityId && hass.states[entityId]) {
-        this._updateSection(key, hass.states[entityId].attributes.data || []);
-      }
+    if (!this.shadowRoot.innerHTML) {
+      this.render();
+    }
+
+    Object.values(this.sections).forEach(section => {
+      const entity = hass.states[section.entity] || { attributes: { data: [] } };
+      section.update(this.shadowRoot, entity);
     });
   }
 
-  _buildCard() {
-    this.innerHTML = `
-      <ha-card>
-        <div class="mediarr-container"></div>
-      </ha-card>
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; margin-bottom: 5px; }
+        .section-content { display: flex; overflow-x: auto; gap: 8px; padding: 8px 0; }
+        .media-item { flex: 0 0 auto; width: 120px; cursor: pointer; text-align: center; }
+        .media-item img { width: 100%; border-radius: 6px; }
+        .media-item-title { font-size: 0.8em; margin-top: 4px; }
+        .media-item.selected { outline: 2px solid #42A5F5; }
+        .empty-section-content { padding: 20px; color: #aaa; text-align: center; }
+      </style>
+      ${Object.values(this.sections).map(s => s.generateTemplate()).join('')}
     `;
-    this.content = this.querySelector('.mediarr-container');
+  }
+}
+
+class EmbySection {
+  constructor(title, entity) {
+    this.title = title;
+    this.entity = entity;
+    this.key = title.toLowerCase();
   }
 
-  _updateSection(key, items) {
-    const section = this.sections[key];
-    const sectionDiv = document.createElement('div');
-    sectionDiv.classList.add('mediarr-section');
-    sectionDiv.innerHTML = `<h3>${section.title}</h3>`;
-
-    const itemsDiv = document.createElement('div');
-    itemsDiv.classList.add('mediarr-items');
-
-    items.slice(0, this.maxItems).forEach(item => {
-      const card = document.createElement('div');
-      card.classList.add('mediarr-item');
-      card.innerHTML = `
-        <img src="${item.poster}" alt="${item.title}" style="width:100px;height:150px;">
-        <div>${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      `;
-      itemsDiv.appendChild(card);
-    });
-
-    sectionDiv.appendChild(itemsDiv);
-    this.content.appendChild(sectionDiv);
+  generateTemplate() {
+    return `
+      <div class="section" data-section="${this.key}">
+        <div class="section-title">${this.title}</div>
+        <div class="section-content horizontal-scroll"></div>
+      </div>
+    `;
   }
 
-  static getStubConfig() {
-    return {
-      max_items: 10,
-      emby_movies_entity: 'sensor.emby_recently_added_movies',
-      emby_series_entity: 'sensor.emby_recently_added_series'
-    };
+  update(containerRoot, entity) {
+    const container = containerRoot.querySelector(`[data-section="${this.key}"] .section-content`);
+    if (!container) return;
+
+    const items = entity.attributes.data || [];
+    if (!items.length) {
+      container.innerHTML = `<div class="empty-section-content">No recently added media</div>`;
+      return;
+    }
+
+    container.innerHTML = items.slice(0, 10).map((item, index) => `
+      <div class="media-item" data-index="${index}">
+        <img src="${item.poster}" alt="${item.title}">
+        <div class="media-item-title">${item.title}</div>
+      </div>
+    `).join('');
   }
 }
 
 customElements.define('mediarr-card', MediarrCard);
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "mediarr-card",
-  name: "Mediarr Card",
-  description: "Minimal Emby-only card for movies and series",
-  preview: true
-});
