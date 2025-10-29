@@ -1,7 +1,7 @@
 // sections/radarr-section.js
 import { BaseSection } from './base-section.js';
 
-export class JellyfinSection extends BaseSection {
+export class RadarrSection extends BaseSection {
   constructor() {
     super('jellyfin', 'Emby Neueste Serien');
   }
