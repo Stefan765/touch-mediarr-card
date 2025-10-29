@@ -3,7 +3,7 @@ import { BaseSection } from './base-section.js';
 
 export class EmbySection extends BaseSection {
   constructor() {
-    super('emby', 'Emby Recently Added');
+    super('emby', 'Emby Neueste Filme');
   }
 
   updateInfo(cardInstance, item) {
