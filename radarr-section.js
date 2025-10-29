@@ -3,7 +3,7 @@ import { BaseSection } from './base-section.js';
 
 export class JellyfinSection extends BaseSection {
   constructor() {
-    super('jellyfin', 'Jellyfin Recently Added');
+    super('jellyfin', 'Emby Neueste Serien');
   }
 
   updateInfo(cardInstance, item) {
