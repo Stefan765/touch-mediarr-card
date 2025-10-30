@@ -183,7 +183,7 @@ export const styles = `
   .media-item {
     flex: 0 0 auto;
     width: 85px;
-    height: 135px;
+    height: 165px;
     position: relative;
     cursor: pointer;
     transform: translateY(0);
