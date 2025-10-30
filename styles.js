@@ -264,7 +264,7 @@ export const styles = `
 
   .overview {
     margin-top: 2px;
-    font-size: var(--subtitle-size);
+    font-size: 0.7em;
     opacity: 0.7;
     display: -webkit-box;
     -webkit-line-clamp: 2;
