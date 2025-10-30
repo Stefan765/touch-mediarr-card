@@ -217,7 +217,7 @@ export const styles = `
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60%;
+    height: 70%;
     background: linear-gradient(transparent, rgba(0,0,0,0.9));
     pointer-events: none;
     border-bottom-left-radius: 8px;
