@@ -18,17 +18,26 @@ export class RadarrSection extends BaseSection {
       return;
     }
 
-    // Then add Jellyfin-specific info display
-    const addedDate = item.release ? new Date(item.release).toLocaleDateString() : 'Unknown';
-    const runtime = item.runtime ? `${item.runtime} min` : '';
-    const subtitle = item.episode ? `${item.number || ''} - ${item.episode || ''}` : '';
+    // Daten aus der Entität aufbereiten
+    const releaseYear = item.release || 'Unbekannt';
+    const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
+    const genres = item.genres || '';
+    const rating = item.rating || '';
+    const studio = item.studio || '';
+    const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
+    // HTML-Inhalt für die Infobox
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      <div class="details">${subtitle}</div>
-      <div class="metadata">Released: ${addedDate}${runtime ? ` | ${runtime}` : ''}</div>
+      <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
+      <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
+      <div class="metadata">
+        ${runtime ? `⏱️ ${runtime}` : ''} 
+        ${rating ? ` | ⭐ ${rating}` : ''} 
+      </div>
+      <div class="summary">${summary}</div>
     `;
   }
+
 
     generateMediaItem(item, index, selectedType, selectedIndex) {
     // Handle empty state
