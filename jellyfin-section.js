@@ -25,8 +25,6 @@ export class JellyfinSection extends BaseSection {
     const rating = item.rating || '';
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
-    const trailer = item.trailer ? `<a href="${item.trailer}" target="_blank">🎬 Trailer ansehen</a>` : '';
-    const deepLink = item.deep_link ? `<a href="${item.deep_link}" target="_blank">📺 In Jellyfin öffnen</a>` : '';
 
     // HTML-Inhalt für die Infobox
     cardInstance.info.innerHTML = `
@@ -37,11 +35,6 @@ export class JellyfinSection extends BaseSection {
         ${rating ? ` | ⭐ ${rating}` : ''} 
       </div>
       <div class="summary">${summary}</div>
-      <div class="links">
-        ${trailer}
-        ${trailer && deepLink ? ' | ' : ''}
-        ${deepLink}
-      </div>
     `;
   }
 
