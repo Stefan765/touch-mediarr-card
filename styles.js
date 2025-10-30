@@ -81,7 +81,7 @@ export const styles = `
 
   .media-info {
     position: absolute;
-    bottom: 0;
+    bottom: auto;
     left: 0;
     right: 0;
     padding: 12px;
