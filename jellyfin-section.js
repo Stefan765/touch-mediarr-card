@@ -39,18 +39,19 @@ export class JellyfinSection extends BaseSection {
   }
 
     generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Prüfen, ob item existiert und notwendige Felder hat
-    if (!item || !item.poster || !item.title) return ''; // Nichts rendern, wenn Daten fehlen
-  
-    // Film-Cover anzeigen
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
            data-index="${index}">
         <img src="${item.poster}" alt="${item.title}">
         <div class="media-item-title">${item.title}</div>
+        <div class="media-item-info">
+          <span class="media-item-rating">⭐ ${item.rating || 'N/A'}</span>
+          <button class="fav-btn" data-id="${item.id}" title="Zu Favoriten hinzufügen">❤️</button>
+        </div>
       </div>
     `;
   }
+
 }
  
