@@ -7,15 +7,18 @@ export class JellyfinSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
+    // Standard-Handling aus der Basisklasse (z. B. Hintergrundbild)
     super.updateInfo(cardInstance, item);
+
     if (!item) return;
 
-    // Wenn Platzhalter, nichts anzeigen
+    // Wenn es sich um den Platzhalter handelt, nichts anzeigen
     if (item.title_default) {
       cardInstance.info.innerHTML = '';
       return;
     }
 
+    // Daten aus der Entität aufbereiten
     const releaseYear = item.release || 'Unbekannt';
     const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
     const genres = item.genres || '';
@@ -23,6 +26,7 @@ export class JellyfinSection extends BaseSection {
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
+    // HTML-Inhalt für die Infobox
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
       <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
@@ -55,3 +59,4 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 }
+ 
