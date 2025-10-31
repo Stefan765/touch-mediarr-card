@@ -6,24 +6,6 @@ export class JellyfinSection extends BaseSection {
     super('jellyfin', 'Emby Neueste Filme');
   }
 
-  update(cardInstance, entityState) {
-    if (!entityState?.attributes?.data) return;
-  
-    const maxItems = cardInstance.config?.jellyfin_max_items || 5;
-  
-    const items = entityState.attributes.data.slice(0, maxItems);
-  
-    const sectionHtml = items.map((item, index) => 
-      this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
-    ).join('');
-  
-    const sectionElement = cardInstance.querySelector(`[data-section="${this.key}"] .section-content`);
-    if (sectionElement) sectionElement.innerHTML = sectionHtml;
-  
-    // Optional: erste Info anzeigen
-    if (items[0]) this.updateInfo(cardInstance, items[0]);
-  }
-
 
   updateInfo(cardInstance, item) {
     // Standard-Handling aus der Basisklasse (z. B. Hintergrundbild)
