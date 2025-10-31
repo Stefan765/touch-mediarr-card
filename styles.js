@@ -529,4 +529,27 @@ export const styles = `
       background: #ffffff;
     }
   }
+  .media-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+  }
+  
+  .fav-btn {
+    background: none;
+    border: none;
+    color: #ff4081;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.3s;
+  }
+  
+  .fav-btn:hover {
+    transform: scale(1.2);
+    color: #ff79a8;
+  }
+
 `;
