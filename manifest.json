@@ -1,0 +1,18 @@
+{
+  "domain": "emby-mediarr-card",
+  "name": "Emby Mediarr Card",
+  "documentation": "https://github.com/DeinName/emby-mediarr-card",
+  "issue_tracker": "https://github.com/DeinName/emby-mediarr-card/issues",
+  "version": "1.0.0",
+  "type": "module",
+  "integration_type": "lovelace",
+  "codeowners": ["@DeinName"],
+  "render_readme": true,
+  "iot_class": "local_push",
+  "dependencies": [],
+  "requirements": [],
+  "after_dependencies": [],
+  "quality_scale": "internal",
+  "homeassistant": "2023.1.0",
+  "country": ["all"]
+}
