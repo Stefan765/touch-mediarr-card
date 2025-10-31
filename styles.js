@@ -249,7 +249,7 @@ export const styles = `
   }
 
   .summary {
-    font-size: 0.7em; /* Schriftgröße kleiner – kannst z. B. 0.7em oder 0.9em wählen */
+    font-size: 0.75em; /* Schriftgröße kleiner – kannst z. B. 0.7em oder 0.9em wählen */
     opacity: 0.85;
     margin-top: 6px;
     line-height: 1.3;
