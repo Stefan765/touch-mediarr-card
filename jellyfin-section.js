@@ -39,7 +39,10 @@ export class JellyfinSection extends BaseSection {
   }
 
     generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Direkt das Film-Cover anzeigen
+    // Prüfen, ob item existiert und notwendige Felder hat
+    if (!item || !item.poster || !item.title) return ''; // Nichts rendern, wenn Daten fehlen
+  
+    // Film-Cover anzeigen
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -49,5 +52,4 @@ export class JellyfinSection extends BaseSection {
       </div>
     `;
   }
-
  
