@@ -34,7 +34,7 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
-generateMediaItem(item, index, selectedType, selectedIndex) {
+  generateMediaItem(item, index, selectedType, selectedIndex) {
   // Handle empty state
   if (item.title_default) {
     return `
