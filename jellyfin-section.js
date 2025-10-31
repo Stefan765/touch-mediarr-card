@@ -38,19 +38,3 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
-generateMediaItem(item, index, selectedType, selectedIndex) {
-  // Wenn item leer oder Platzhalter, nichts rendern
-  if (!item || item.title_default) {
-    return ''; // Einfach leer zurückgeben
-  }
-
-  // Normales Medienlayout
-  return `
-    <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
-         data-type="${this.key}"
-         data-index="${index}">
-      <img src="${item.poster}" alt="${item.title}">
-      <div class="media-item-title">${item.title}</div>
-    </div>
-  `;
-}
