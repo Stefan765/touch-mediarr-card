@@ -21,7 +21,7 @@ export const styles = `
     
     /* Typography */
     --title-size: 1.2em;
-    --subtitle-size: 0.9em;
+    --subtitle-size: 0.7em;
     --caption-size: 0.75em;
   }
 
