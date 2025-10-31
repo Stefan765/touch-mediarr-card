@@ -29,9 +29,14 @@ export class BaseSection {
            data-index="${index}">
         <img src="${item.poster}" alt="${item.title}">
         <div class="media-item-title">${item.title}</div>
+        <div class="media-item-footer">
+          ${item.rating ? `<span class="rating">⭐ ${item.rating.toFixed(1)}</span>` : ''}
+          <button class="fav-btn" data-id="${item.id}">♡</button>
+        </div>
       </div>
     `;
   }
+
 
   // In BaseSection class
   updateInfo(cardInstance, item) {
