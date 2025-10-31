@@ -7,18 +7,15 @@ export class JellyfinSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
-    // Standard-Handling aus der Basisklasse (z. B. Hintergrundbild)
     super.updateInfo(cardInstance, item);
-
     if (!item) return;
 
-    // Wenn es sich um den Platzhalter handelt, nichts anzeigen
+    // Wenn Platzhalter, nichts anzeigen
     if (item.title_default) {
       cardInstance.info.innerHTML = '';
       return;
     }
 
-    // Daten aus der Entität aufbereiten
     const releaseYear = item.release || 'Unbekannt';
     const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
     const genres = item.genres || '';
@@ -26,7 +23,6 @@ export class JellyfinSection extends BaseSection {
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
-    // HTML-Inhalt für die Infobox
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
       <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
@@ -38,17 +34,23 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
-    generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Handle empty state
-    if (item.title_default) {
-      return `
-        <div class="empty-section-content">
-          <div class="empty-message">No recently added media</div>
-        </div>
-      `;
-    }
+  // **Hier ist die neue Funktion für Media Items**
+  update(cardInstance, entity) {
+    if (!entity || !entity.attributes?.data) return;
 
-    // Use original media item layout
+    const data = entity.attributes.data;
+    const maxItems = cardInstance.config?.jellyfin_max_items || 20; // Max Items aus config
+    const itemsToShow = data.filter(item => !item.title_default).slice(0, maxItems); // Keine Platzhalter
+
+    const html = itemsToShow.map((item, index) =>
+      this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
+    ).join('');
+
+    const sectionEl = cardInstance.querySelector(`[data-section="${this.key}"] .section-content`);
+    if (sectionEl) sectionEl.innerHTML = html;
+  }
+
+  generateMediaItem(item, index, selectedType, selectedIndex) {
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -59,5 +61,3 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 }
- 
-
