@@ -22,7 +22,7 @@ export class BaseSection {
     `;
   }
 
-  generateMediaItem(item, index, selectedType, selectedIndex) {
+   generateMediaItem(item, index, selectedType, selectedIndex) {
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -31,7 +31,9 @@ export class BaseSection {
         <div class="media-item-title">${item.title}</div>
         <div class="media-item-footer">
           ${item.rating ? `<span class="rating">⭐ ${item.rating.toFixed(1)}</span>` : ''}
-          <button class="fav-btn" data-id="${item.id}">♡</button>
+          <button class="fav-btn" data-id="${item.id}" title="Zu Favoriten hinzufügen">
+            <ha-icon icon="mdi:heart-outline"></ha-icon>
+          </button>
         </div>
       </div>
     `;
