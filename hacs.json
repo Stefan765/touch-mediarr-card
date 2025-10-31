@@ -1,6 +1,6 @@
 {
-  "name": "Mediarr Card",
-  "filename": "mediarr-card.js",
+  "name": "Emby Mediarr Card",
+  "filename": "emby-mediarr-card.js",
   "type": "module",
   "render_readme": true,
   "domains": ["lovelace"],
