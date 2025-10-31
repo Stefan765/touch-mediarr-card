@@ -460,12 +460,12 @@ class MediarrCard extends HTMLElement {
   }
 }
 
-customElements.define('mediarr-card', MediarrCard);
+customElements.define('emby-mediarr-card', MediarrCard);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "touch-mediarr-card",
-  name: "Touch Mediarr Card",
-  description: "A modular card for displaying media from various sources",
+  type: "emby-mediarr-card",
+  name: "Emby Mediarr Card",
+  description: "A modular card for displaying media from emby",
   preview: true
 });
