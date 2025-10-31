@@ -82,6 +82,17 @@ export class BaseSection {
     ).join('');
 
     this.addClickHandlers(cardInstance, listElement, items);
+
+    // 🩷 Favoriten-Buttons aktivieren
+    listElement.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const itemId = e.target.dataset.id;
+        await this.addToFavorites(cardInstance, itemId);
+        e.target.textContent = '💖'; // Button ändert sich
+      });
+    });
+
     
     // Update card background periodically with random artwork
     if (cardInstance.cardBackground && (!this._lastBackgroundUpdate || Date.now() - this._lastBackgroundUpdate > 30000)) {
