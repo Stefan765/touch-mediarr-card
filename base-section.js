@@ -181,4 +181,29 @@ export class BaseSection {
       return '';
     }
   }
+  
+  async addToFavorites(cardInstance, itemId) {
+  const serverUrl = cardInstance.config.emby_url;
+  const apiKey = cardInstance.config.emby_api_key;
+  const userId = cardInstance.config.emby_user_id;
+
+  if (!serverUrl || !apiKey || !userId) {
+    console.error("⚠️ Emby-Konfiguration unvollständig!");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`, {
+      method: 'POST'
+    });
+    if (res.ok) {
+      console.log(`✅ Item ${itemId} wurde zu Favoriten hinzugefügt.`);
+    } else {
+      console.error('❌ Fehler beim Hinzufügen zu Favoriten:', res.status);
+    }
+  } catch (err) {
+    console.error('💥 Fehler beim Favorisieren:', err);
+  }
+}
+
 }
