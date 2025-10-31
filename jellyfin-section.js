@@ -34,30 +34,23 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
-  // **Hier ist die neue Funktion für Media Items**
-  update(cardInstance, entity) {
-    if (!entity || !entity.attributes?.data) return;
-
-    const data = entity.attributes.data;
-    const maxItems = cardInstance.config?.jellyfin_max_items || 20; // Max Items aus config
-    const itemsToShow = data.filter(item => !item.title_default).slice(0, maxItems); // Keine Platzhalter
-
-    const html = itemsToShow.map((item, index) =>
-      this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
-    ).join('');
-
-    const sectionEl = cardInstance.querySelector(`[data-section="${this.key}"] .section-content`);
-    if (sectionEl) sectionEl.innerHTML = html;
-  }
-
-  generateMediaItem(item, index, selectedType, selectedIndex) {
+generateMediaItem(item, index, selectedType, selectedIndex) {
+  // Handle empty state
+  if (item.title_default) {
     return `
-      <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
-           data-type="${this.key}"
-           data-index="${index}">
-        <img src="${item.poster}" alt="${item.title}">
-        <div class="media-item-title">${item.title}</div>
+      <div class="empty-section-content">
+        <div class="empty-message">No recently added media</div>
       </div>
     `;
   }
+
+  return `
+    <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
+         data-type="${this.key}"
+         data-index="${index}">
+      <img src="${item.poster}" alt="${item.title}">
+      <div class="media-item-title">${item.title}</div>
+    </div>
+  `;
 }
+
