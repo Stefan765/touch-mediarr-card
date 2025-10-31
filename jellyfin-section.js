@@ -52,4 +52,5 @@ export class JellyfinSection extends BaseSection {
         </div>
       `;
     }
+ }
 
