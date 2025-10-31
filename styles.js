@@ -21,7 +21,7 @@ export const styles = `
     
     /* Typography */
     --title-size: 1.2em;
-    --subtitle-size: 0.7em;
+    --subtitle-size: 0.9em;
     --caption-size: 0.75em;
   }
 
@@ -247,6 +247,20 @@ export const styles = `
     margin-bottom: 0;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   }
+
+  .summary {
+    font-size: 0.7em; /* Schriftgröße kleiner – kannst z. B. 0.7em oder 0.9em wählen */
+    opacity: 0.85;
+    margin-top: 6px;
+    line-height: 1.3;
+    max-height: 3.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Anzahl der sichtbaren Zeilen */
+    -webkit-box-orient: vertical;
+  }
+
 
   .details {
     display: flex;
