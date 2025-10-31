@@ -40,16 +40,10 @@ export class RadarrSection extends BaseSection {
 
 
     generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Handle empty state
-    if (item.title_default) {
-      return `
-        <div class="empty-section-content">
-          <div class="empty-message">No recently added media</div>
-        </div>
-      `;
-    }
-
-    // Use original media item layout
+    // Prüfen, ob item existiert und notwendige Felder hat
+    if (!item || !item.poster || !item.title) return ''; // Nichts rendern, wenn Daten fehlen
+  
+    // Film-Cover anzeigen
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
