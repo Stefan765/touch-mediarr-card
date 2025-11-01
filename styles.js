@@ -539,7 +539,14 @@ export const styles = `
     right: 4px;
     font-size: 0.8em;
     color: var(--secondary-text-color);
-    z-index: 10; /* über Gradient-Overlay */
+  }
+
+  .metadata {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Abstand zwischen Rating und Button */
+    font-size: var(--subtitle-size);
+    opacity: 0.9;
   }
   
   .fav-btn {
@@ -549,8 +556,6 @@ export const styles = `
     font-size: 1.3em;
     cursor: pointer;
     transition: transform 0.2s, color 0.3s;
-    z-index: 11;
-    position: relative;
   }
 
   .media-item-title {
@@ -561,6 +566,9 @@ export const styles = `
   .fav-btn:hover {
     transform: scale(1.2);
     color: #ff79a8;
+  }
+  .fav-btn.favorited {
+    color: #ff4081;
   }
 
 `;
