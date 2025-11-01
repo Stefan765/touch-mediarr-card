@@ -21,8 +21,12 @@ export class BaseSection {
     `;
   }
 
-  // 🩷 --- Medien-Item mit sichtbarem Herzbutton ---
+  // 🎬 Medienkarte mit Bewertungsstern + Favoritenherz
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    const isFavorite = item.isFavorite || item.favorite || false;
+    const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
+    const favClass = isFavorite ? "favorited" : "";
+
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -31,15 +35,15 @@ export class BaseSection {
         <div class="media-item-title">${item.title}</div>
         <div class="media-item-footer">
           ${item.rating ? `<span class="rating">⭐ ${item.rating.toFixed(1)}</span>` : ''}
-          <button class="fav-btn" data-id="${item.id}" title="Zu Favoriten hinzufügen">
-            <ha-icon icon="mdi:heart-outline"></ha-icon>
+          <button class="fav-btn ${favClass}" data-id="${item.id}" title="Favorit umschalten">
+            <ha-icon icon="${heartIcon}"></ha-icon>
           </button>
         </div>
       </div>
     `;
   }
 
-  // 🧠 --- Info-Bereich (Standardverhalten) ---
+  // 📋 Infoanzeige
   updateInfo(cardInstance, item) {
     if (!item) return;
 
@@ -61,12 +65,11 @@ export class BaseSection {
         <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
         <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
         <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
-        <div>Using for media: ${mediaBackground}</div>
       </div>
     `;
   }
 
-  // 🧩 --- Update der Sektion + Buttonlogik ---
+  // 🔄 Update der Liste + Favoritenlogik
   update(cardInstance, entity) {
     const maxItems =
       cardInstance.config[`${this.key}_max_items`] ||
@@ -87,26 +90,33 @@ export class BaseSection {
 
     this.addClickHandlers(cardInstance, listElement, items);
 
-    // 🩷 Favoritenbuttons aktivieren
+    // ❤️ Favoriten-Button aktivieren
     listElement.querySelectorAll('.fav-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
 
-        const itemId = e.currentTarget.dataset.id;
-        const icon = e.currentTarget.querySelector('ha-icon');
+        const button = e.currentTarget;
+        const icon = button.querySelector('ha-icon');
+        const itemId = button.dataset.id;
 
-        await this.addToFavorites(cardInstance, itemId);
+        const isFav = button.classList.toggle('favorited');
 
-        // Toggle Herzstatus
-        const isFav = e.currentTarget.classList.toggle('favorited');
+        // UI sofort updaten
         icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+
+        // API-Call
+        if (isFav) {
+          await this.addToFavorites(cardInstance, itemId);
+        } else {
+          await this.removeFromFavorites(cardInstance, itemId);
+        }
       });
     });
 
-    // 🎨 CSS einmalig injizieren
+    // Styles sicherstellen
     this.ensureStyles(cardInstance);
 
-    // 🖼️ Hintergrund zufällig aktualisieren
+    // Zufälliges Hintergrundbild (alle 30s)
     if (
       cardInstance.cardBackground &&
       (!this._lastBackgroundUpdate ||
@@ -120,7 +130,7 @@ export class BaseSection {
     }
   }
 
-  // 💡 --- Klick-Handler für Medien ---
+  // 📀 Klick-Handler
   addClickHandlers(cardInstance, listElement, items) {
     listElement.querySelectorAll('.media-item').forEach((item) => {
       item.onclick = () => {
@@ -152,7 +162,7 @@ export class BaseSection {
     });
   }
 
-  // 🎨 --- Styles innerhalb der Karte hinzufügen (sichtbar in HA) ---
+  // 🧩 CSS dynamisch injizieren (Home Assistant kompatibel)
   ensureStyles(cardInstance) {
     const card = cardInstance.closest('ha-card');
     if (card && !card.querySelector('style[data-fav-style]')) {
@@ -185,7 +195,7 @@ export class BaseSection {
     }
   }
 
-  // 🔁 --- Zufälliges Hintergrundbild wählen ---
+  // 🖼️ Zufälliges Hintergrundbild wählen
   getRandomArtwork(items) {
     if (!items || items.length === 0) return null;
     const validItems = items.filter(
@@ -197,7 +207,7 @@ export class BaseSection {
     return randomItem.fanart || randomItem.backdrop || randomItem.banner;
   }
 
-  // 🧩 --- Hilfsfunktionen ---
+  // 🧩 Helferfunktionen
   getAllArtwork(items) {
     if (!items || items.length === 0) return [];
     return items.reduce((artworks, item) => {
@@ -219,29 +229,53 @@ export class BaseSection {
     }
   }
 
-  // ❤️ --- Emby-Favoritenfunktion ---
+  // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const serverUrl = cardInstance.config.emby_url;
-    const apiKey = cardInstance.config.emby_api_key;
-    const userId = cardInstance.config.emby_user_id;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
 
     if (!serverUrl || !apiKey || !userId) {
-      console.error('⚠️ Emby-Konfiguration unvollständig!');
+      console.error("⚠️ Emby-Konfiguration unvollständig!");
       return;
     }
 
     try {
       const res = await fetch(
         `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        { method: 'POST' }
+        { method: "POST" }
       );
       if (res.ok) {
         console.log(`✅ Item ${itemId} wurde zu Favoriten hinzugefügt.`);
       } else {
-        console.error('❌ Fehler beim Hinzufügen zu Favoriten:', res.status);
+        console.error("❌ Fehler beim Hinzufügen:", res.status);
       }
     } catch (err) {
-      console.error('💥 Fehler beim Favorisieren:', err);
+      console.error("💥 Fehler beim Favorisieren:", err);
+    }
+  }
+
+  // 💔 Emby: Aus Favoriten entfernen
+  async removeFromFavorites(cardInstance, itemId) {
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
+
+    if (!serverUrl || !apiKey || !userId) {
+      console.error("⚠️ Emby-Konfiguration unvollständig!");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        console.log(`🗑️ Item ${itemId} wurde aus Favoriten entfernt.`);
+      } else {
+        console.error("❌ Fehler beim Entfernen:", res.status);
+      }
+    } catch (err) {
+      console.error("💥 Fehler beim Entfernen:", err);
     }
   }
 }
