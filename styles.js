@@ -533,11 +533,13 @@ export const styles = `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 4px;
-    font-size: 0.8em;
+    position: absolute;
     bottom: 4px;
-    z-index: 2;
+    left: 4px;
+    right: 4px;
+    font-size: 0.8em;
     color: var(--secondary-text-color);
+    z-index: 2; /* über Gradient-Overlay */
   }
   
   .fav-btn {
