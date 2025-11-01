@@ -552,6 +552,11 @@ export const styles = `
     z-index: 11;
     position: relative;
   }
+
+  .media-item-title {
+    position: relative;
+    z-index: 1;           /* kleiner als Footer/Button */
+  }
   
   .fav-btn:hover {
     transform: scale(1.2);
