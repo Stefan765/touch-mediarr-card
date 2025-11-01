@@ -5,15 +5,10 @@ export class JellyfinSection extends BaseSection {
     super('jellyfin', 'Emby Neueste Filme');
   }
 
+  // Überschreibt die Info-Anzeige
   updateInfo(cardInstance, item) {
     super.updateInfo(cardInstance, item);
-
     if (!item) return;
-
-    if (item.title_default) {
-      cardInstance.info.innerHTML = '';
-      return;
-    }
 
     const releaseYear = item.release || 'Unbekannt';
     const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
@@ -33,6 +28,7 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
+  // Media Item mit Herz-Button
   generateMediaItem(item, index, selectedType, selectedIndex) {
     if (!item || item.title_default) return '';
 
@@ -48,7 +44,6 @@ export class JellyfinSection extends BaseSection {
            data-index="${index}">
         <img src="${poster}" alt="${title}">
         <div class="media-item-title">${title}</div>
-
         <div class="media-item-footer">
           ${rating ? `<span class="rating">⭐ ${parseFloat(rating).toFixed(1)}</span>` : '<span></span>'}
           <button class="fav-btn ${isFavorite ? 'favorited' : ''}" 
@@ -61,18 +56,29 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
+  // Update-Section, Container anpassen
   updateSection(cardInstance, items) {
     const html = items.map((item, index) =>
       this.generateMediaItem(item, index, this.selectedType, this.selectedIndex)
     ).join('');
 
-    const container = cardInstance.querySelector('.media-container');
+    // ⚠️ Stelle sicher, dass der Container existiert
+    let container = cardInstance.querySelector('.media-container');
+    if (!container) {
+      // Falls noch nicht vorhanden, erstelle ihn
+      container = document.createElement('div');
+      container.classList.add('media-container');
+      const sectionContent = cardInstance.querySelector('.section-content');
+      sectionContent.appendChild(container);
+    }
+
     container.innerHTML = html;
 
-    // Nach dem Rendern Events binden
+    // Favoriten-Events nach dem Rendern
     this.attachFavoriteHandlers(cardInstance);
   }
 
+  // Herz-Button Event-Handler
   attachFavoriteHandlers(cardInstance) {
     const favButtons = cardInstance.querySelectorAll('.fav-btn');
     favButtons.forEach(btn => {
@@ -82,7 +88,7 @@ export class JellyfinSection extends BaseSection {
         const itemId = btn.dataset.id;
         const isFav = btn.classList.contains('favorited');
 
-        // Deine Emby-/Jellyfin-Daten hier anpassen:
+        // Beispiel-Emby/Jellyfin Konfiguration
         const userId = '1234567890abcdef';
         const apiKey = 'ABCDEFG123456';
         const baseUrl = 'http://192.168.1.50:8096';
