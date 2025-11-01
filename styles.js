@@ -535,6 +535,8 @@ export const styles = `
     align-items: center;
     margin-top: 4px;
     font-size: 0.8em;
+    bottom: 4px;
+    z-index: 2;
     color: var(--secondary-text-color);
   }
   
