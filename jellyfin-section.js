@@ -31,19 +31,18 @@ export class JellyfinSection extends BaseSection {
   // Media Item mit Herz-Button
   generateMediaItem(item, index, selectedType, selectedIndex) {
     if (!item || item.title_default) return '';
-
+  
     const itemId = item.Id || item.id || item.media_id || '';
     const rating = item.communityRating || item.rating || '';
     const poster = item.poster || item.image || '';
     const title = item.title || item.name || 'Unbekannt';
     const isFavorite = item.UserData?.IsFavorite || false;
-
+  
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
            data-index="${index}">
         <img src="${poster}" alt="${title}">
-        <div class="media-item-title">${title}</div>
         <div class="media-item-footer">
           ${rating ? `<span class="rating">⭐ ${parseFloat(rating).toFixed(1)}</span>` : '<span></span>'}
           <button class="fav-btn ${isFavorite ? 'favorited' : ''}" 
@@ -52,9 +51,11 @@ export class JellyfinSection extends BaseSection {
             ${isFavorite ? '♥' : '♡'}
           </button>
         </div>
+        <div class="media-item-title">${title}</div>
       </div>
     `;
   }
+
 
   // Update-Section, Container anpassen
   updateSection(cardInstance, items) {
