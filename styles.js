@@ -539,7 +539,7 @@ export const styles = `
     right: 4px;
     font-size: 0.8em;
     color: var(--secondary-text-color);
-    z-index: 2; /* über Gradient-Overlay */
+    z-index: 10; /* über Gradient-Overlay */
   }
   
   .fav-btn {
@@ -549,6 +549,8 @@ export const styles = `
     font-size: 1.3em;
     cursor: pointer;
     transition: transform 0.2s, color 0.3s;
+    z-index: 11;
+    position: relative;
   }
   
   .fav-btn:hover {
