@@ -114,12 +114,18 @@ export class BaseSection {
 
         icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
 
-        if (isFav) {
-          await this.addToFavorites(cardInstance, itemId);
-          this._favoriteIds.add(itemId);
-        } else {
-          await this.removeFromFavorites(cardInstance, itemId);
-          this._favoriteIds.delete(itemId);
+        try {
+          if (isFav) {
+            await this.addToFavorites(cardInstance, itemId);
+            this._favoriteIds.add(itemId);
+          } else {
+            await this.removeFromFavorites(cardInstance, itemId);
+            this._favoriteIds.delete(itemId);
+          }
+        } catch {
+          // Bei Fehlern Herz zurücksetzen
+          button.classList.toggle('favorited', !isFav);
+          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
         }
       });
     });
@@ -211,7 +217,12 @@ export class BaseSection {
 
     try {
       const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Content-Type-Options': 'nosniff'
+        }
+      });
       if (!res.ok) return;
 
       const data = await res.json();
@@ -232,12 +243,20 @@ export class BaseSection {
     try {
       const res = await fetch(
         `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        { method: "POST" }
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Content-Type-Options': 'nosniff'
+          }
+        }
       );
+
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
+      throw err;
     }
   }
 
@@ -250,12 +269,20 @@ export class BaseSection {
     try {
       const res = await fetch(
         `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Content-Type-Options': 'nosniff'
+          }
+        }
       );
+
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
     } catch (err) {
-      console.error("💥 Fehler beim Entfernen:", err);
+      console.error("💥 Fehler beim Entfernen der Favoriten:", err);
+      throw err;
     }
   }
 
