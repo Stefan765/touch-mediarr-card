@@ -17,21 +17,21 @@ export class JellyfinSection extends BaseSection {
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
-  cardInstance.info.innerHTML = `
-    <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
-    <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
-    <div class="metadata">
-      <span class="rating">
-        ${rating ? `⭐ ${parseFloat(rating).toFixed(1)}` : ''}
-      </span>
-      <button class="fav-btn ${isFavorite ? 'favorited' : ''}" 
-              data-id="${item.id}" 
-              title="${isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
-        ${isFavorite ? '♥' : '♡'}
-      </button>
-    </div>
-    <div class="summary">${summary}</div>
-  `;
+    cardInstance.info.innerHTML = `
+      <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
+      <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
+      <div class="metadata">
+        <span class="rating">
+          ${rating ? `⭐ ${parseFloat(rating).toFixed(1)}` : ''}
+        </span>
+        <button class="fav-btn ${isFavorite ? 'favorited' : ''}" 
+                data-id="${item.id}" 
+                title="${isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
+          ${isFavorite ? '♥' : '♡'}
+        </button>
+      </div>
+      <div class="summary">${summary}</div>
+    `;
  }
 
 
