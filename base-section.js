@@ -24,6 +24,7 @@ export class BaseSection {
 
   // 🎬 Einzelnes Medien-Item (Poster + Sterne + Herz)
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    console.log("🎬 generateMediaItem() called for:", item.title, item.id);
     const isFavorite = item.isFavorite || false;
     const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
     const favClass = isFavorite ? "favorited" : "";
