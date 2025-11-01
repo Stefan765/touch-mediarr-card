@@ -271,11 +271,6 @@ export const styles = `
     opacity: 0.9;
   }
 
-  .metadata {
-    font-size: var(--subtitle-size);
-    opacity: 0.8;
-  }
-
   .overview {
     margin-top: 2px;
     font-size: 0.7em;
