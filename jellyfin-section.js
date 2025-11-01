@@ -32,6 +32,7 @@ export class JellyfinSection extends BaseSection {
     </div>
     <div class="summary">${summary}</div>
   `;
+ }
 
 
   // Media Item mit Herz-Button
