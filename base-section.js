@@ -3,6 +3,7 @@ export class BaseSection {
     this.key = key;
     this.title = title;
     this._lastBackgroundUpdate = 0;
+    this._favoriteIds = new Set(); // 🩷 lokale Favoritenliste aus Emby
   }
 
   generateTemplate() {
@@ -21,9 +22,9 @@ export class BaseSection {
     `;
   }
 
-  // 🎬 Medienkarte mit Bewertungsstern + Favoritenherz
+  // 🎬 Einzelnes Medien-Item (Poster + Sterne + Herz)
   generateMediaItem(item, index, selectedType, selectedIndex) {
-    const isFavorite = item.isFavorite || item.favorite || false;
+    const isFavorite = item.isFavorite || false;
     const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
     const favClass = isFavorite ? "favorited" : "";
 
@@ -43,7 +44,7 @@ export class BaseSection {
     `;
   }
 
-  // 📋 Infoanzeige
+  // 📋 Infoanzeige (oben im Detail)
   updateInfo(cardInstance, item) {
     if (!item) return;
 
@@ -69,8 +70,8 @@ export class BaseSection {
     `;
   }
 
-  // 🔄 Update der Liste + Favoritenlogik
-  update(cardInstance, entity) {
+  // 🔄 Hauptupdate der Liste
+  async update(cardInstance, entity) {
     const maxItems =
       cardInstance.config[`${this.key}_max_items`] ||
       cardInstance.config.max_items ||
@@ -78,6 +79,15 @@ export class BaseSection {
 
     let items = entity.attributes.data || [];
     items = items.slice(0, maxItems);
+
+    // 🩷 Vorab Favoritenliste aus Emby laden
+    await this.fetchFavoritesFromEmby(cardInstance);
+
+    // 🧩 Markiere Favoriten in den Items
+    items.forEach((item) => {
+      const itemId = item.id || item.Id;
+      item.isFavorite = this._favoriteIds.has(itemId);
+    });
 
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
     if (!listElement) return;
@@ -89,8 +99,9 @@ export class BaseSection {
       .join('');
 
     this.addClickHandlers(cardInstance, listElement, items);
+    this.ensureStyles(cardInstance);
 
-    // ❤️ Favoriten-Button aktivieren
+    // ❤️ Klicklogik für Favoriten
     listElement.querySelectorAll('.fav-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -98,25 +109,21 @@ export class BaseSection {
         const button = e.currentTarget;
         const icon = button.querySelector('ha-icon');
         const itemId = button.dataset.id;
-
         const isFav = button.classList.toggle('favorited');
 
-        // UI sofort updaten
         icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
 
-        // API-Call
         if (isFav) {
           await this.addToFavorites(cardInstance, itemId);
+          this._favoriteIds.add(itemId);
         } else {
           await this.removeFromFavorites(cardInstance, itemId);
+          this._favoriteIds.delete(itemId);
         }
       });
     });
 
-    // Styles sicherstellen
-    this.ensureStyles(cardInstance);
-
-    // Zufälliges Hintergrundbild (alle 30s)
+    // 🎨 Hintergrund aktualisieren (max alle 30s)
     if (
       cardInstance.cardBackground &&
       (!this._lastBackgroundUpdate ||
@@ -130,7 +137,7 @@ export class BaseSection {
     }
   }
 
-  // 📀 Klick-Handler
+  // 🎥 Klick auf Medien-Item (zum Anzeigen der Info)
   addClickHandlers(cardInstance, listElement, items) {
     listElement.querySelectorAll('.media-item').forEach((item) => {
       item.onclick = () => {
@@ -150,7 +157,7 @@ export class BaseSection {
           cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
         }
 
-        this.updateInfo(cardInstance, items[index]);
+        this.updateInfo(cardInstance, selectedItem);
 
         cardInstance.querySelectorAll('.media-item').forEach((i) => {
           i.classList.toggle(
@@ -162,7 +169,7 @@ export class BaseSection {
     });
   }
 
-  // 🧩 CSS dynamisch injizieren (Home Assistant kompatibel)
+  // 🎨 CSS für Herzbutton injizieren
   ensureStyles(cardInstance) {
     const card = cardInstance.closest('ha-card');
     if (card && !card.querySelector('style[data-fav-style]')) {
@@ -195,37 +202,23 @@ export class BaseSection {
     }
   }
 
-  // 🖼️ Zufälliges Hintergrundbild wählen
-  getRandomArtwork(items) {
-    if (!items || items.length === 0) return null;
-    const validItems = items.filter(
-      (item) => item.fanart || item.backdrop || item.banner
-    );
-    if (validItems.length === 0) return null;
-    const randomItem =
-      validItems[Math.floor(Math.random() * validItems.length)];
-    return randomItem.fanart || randomItem.backdrop || randomItem.banner;
-  }
+  // 🧠 Favoriten abrufen (einmal pro Update)
+  async fetchFavoritesFromEmby(cardInstance) {
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
 
-  // 🧩 Helferfunktionen
-  getAllArtwork(items) {
-    if (!items || items.length === 0) return [];
-    return items.reduce((artworks, item) => {
-      if (item.fanart) artworks.push(item.fanart);
-      if (item.backdrop) artworks.push(item.backdrop);
-      if (item.banner) artworks.push(item.banner);
-      return artworks;
-    }, []);
-  }
-
-  formatDate(dateString) {
-    if (!dateString) return '';
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      return date.toLocaleDateString();
-    } catch {
-      return '';
+      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      const favorites = (data.Items || []).map((item) => item.Id);
+      this._favoriteIds = new Set(favorites);
+      console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
+    } catch (err) {
+      console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
   }
 
@@ -233,22 +226,15 @@ export class BaseSection {
   async addToFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
-
-    if (!serverUrl || !apiKey || !userId) {
-      console.error("⚠️ Emby-Konfiguration unvollständig!");
-      return;
-    }
+    if (!serverUrl || !apiKey || !userId) return;
 
     try {
       const res = await fetch(
         `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
         { method: "POST" }
       );
-      if (res.ok) {
-        console.log(`✅ Item ${itemId} wurde zu Favoriten hinzugefügt.`);
-      } else {
-        console.error("❌ Fehler beim Hinzufügen:", res.status);
-      }
+      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
+      else console.error("❌ Fehler beim Hinzufügen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
@@ -258,24 +244,29 @@ export class BaseSection {
   async removeFromFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
-
-    if (!serverUrl || !apiKey || !userId) {
-      console.error("⚠️ Emby-Konfiguration unvollständig!");
-      return;
-    }
+    if (!serverUrl || !apiKey || !userId) return;
 
     try {
       const res = await fetch(
         `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
         { method: "DELETE" }
       );
-      if (res.ok) {
-        console.log(`🗑️ Item ${itemId} wurde aus Favoriten entfernt.`);
-      } else {
-        console.error("❌ Fehler beim Entfernen:", res.status);
-      }
+      if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
+      else console.error("❌ Fehler beim Entfernen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Entfernen:", err);
     }
+  }
+
+  // 🖼️ Zufälliges Hintergrundbild
+  getRandomArtwork(items) {
+    if (!items || items.length === 0) return null;
+    const validItems = items.filter(
+      (item) => item.fanart || item.backdrop || item.banner
+    );
+    if (validItems.length === 0) return null;
+    const randomItem =
+      validItems[Math.floor(Math.random() * validItems.length)];
+    return randomItem.fanart || randomItem.backdrop || randomItem.banner;
   }
 }
