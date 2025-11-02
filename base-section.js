@@ -25,12 +25,10 @@ export class BaseSection {
   // 🎬 Einzelnes Medien-Item (Poster + Sterne + Herz)
   generateMediaItem(item, index, selectedType, selectedIndex) {
     console.log("🎬 generateMediaItem() called for:", item.title, item.id);
-  
-    // Favoritenstatus direkt aus _favoriteIds
-    const isFavorite = this._favoriteIds.has(item.id);
+    const isFavorite = item.isFavorite || false;
     const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
     const favClass = isFavorite ? "favorited" : "";
-  
+
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -47,67 +45,31 @@ export class BaseSection {
     `;
   }
 
-
   // 📋 Infoanzeige (oben im Detail)
   updateInfo(cardInstance, item) {
     if (!item) return;
-  
+
     const mediaBackground = item.banner || item.fanart;
     const cardBackground = item.fanart || item.banner;
-  
+
     if (mediaBackground) {
       cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
       cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
     }
-  
+
     if (cardBackground && cardInstance.cardBackground) {
       cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
     }
-  
-    const isFavorite = this._favoriteIds.has(item.id);
-    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
-    const favClass = isFavorite ? 'favorited' : '';
-  
-    // 🎬 Titel, Rating, Herz, Beschreibung
-    cardInstance.info.innerHTML = `
-      <div class="title-row" style="display:flex; align-items:center; gap:10px;">
-        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-        ${item.rating ? `<div class="rating">⭐ ${item.rating.toFixed(1)}</div>` : ''}
-        <button class="fav-btn ${favClass}" data-id="${item.id}" title="Favorit umschalten">
-          <ha-icon icon="${heartIcon}"></ha-icon>
-        </button>
-      </div>
-  
-      ${item.overview ? `<div class="description" style="margin-top:5px; font-size: 13px; color: var(--secondary-text-color);">${item.overview}</div>` : ''}
-    `;
-  
-    // 💗 Herzbutton oben funktional machen
-    const favBtn = cardInstance.info.querySelector('.fav-btn');
-    if (favBtn) {
-      favBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const icon = favBtn.querySelector('ha-icon');
-        const itemId = favBtn.dataset.id;
-        const isFav = favBtn.classList.toggle('favorited');
-        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-  
-        try {
-          if (isFav) {
-            await this.addToFavorites(cardInstance, itemId);
-            this._favoriteIds.add(itemId);
-          } else {
-            await this.removeFromFavorites(cardInstance, itemId);
-            this._favoriteIds.delete(itemId);
-          }
-        } catch (err) {
-          console.error('💥 Fehler beim Favorisieren:', err);
-          favBtn.classList.toggle('favorited', !isFav);
-          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
-        }
-      });
-    }
-  }
 
+    cardInstance.info.innerHTML = `
+      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+      <div style="font-size: 10px; margin-top: 10px; color: yellow;">
+        <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
+        <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
+        <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
+      </div>
+    `;
+  }
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
@@ -137,17 +99,30 @@ export class BaseSection {
       )
       .join('');
 
-    // 💗 Herz-Klick-Handler hinzufügen
-    this.attachFavListeners(listElement, cardInstance);
-    
-    // 🎥 Klick-Handler für Cover (Infos anzeigen)
     this.addClickHandlers(cardInstance, listElement, items);
-    
-    // 🎨 Styles sicherstellen
     this.ensureStyles(cardInstance);
 
+    // ❤️ Klicklogik für Favoriten
+    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
 
-  
+        const button = e.currentTarget;
+        const icon = button.querySelector('ha-icon');
+        const itemId = button.dataset.id;
+        const isFav = button.classList.toggle('favorited');
+
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+
+        if (isFav) {
+          await this.addToFavorites(cardInstance, itemId);
+          this._favoriteIds.add(itemId);
+        } else {
+          await this.removeFromFavorites(cardInstance, itemId);
+          this._favoriteIds.delete(itemId);
+        }
+      });
+    });
 
     // 🎨 Hintergrund aktualisieren (max alle 30s)
     if (
@@ -233,24 +208,12 @@ export class BaseSection {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-  
-    try {
-      // ✅ Proxy-URL über Home Assistant
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
-      
-      const res = await fetch(url, {
-        headers: {
-          "X-Emby-Token": apiKey,
-          "Accept": "application/json"
-        }
-      });
 
-  
-      if (!res.ok) {
-        console.error("❌ Emby-Favoriten konnten nicht geladen werden:", res.status);
-        return;
-      }
-  
+    try {
+      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+
       const data = await res.json();
       const favorites = (data.Items || []).map((item) => item.Id);
       this._favoriteIds = new Set(favorites);
@@ -262,93 +225,39 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) throw new Error("Emby-Konfiguration fehlt");
-  
-    const url = `${serverUrl}/Users/${userId}/FavoriteItems?ItemIds=${itemId}`;
-  
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
+
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "X-Emby-Token": apiKey,
-          "Content-Type": "application/json"
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${response.status}`);
-      }
-  
-      console.log(`✅ Item ${itemId} erfolgreich favorisiert`);
+      const res = await fetch(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
+        { method: "POST" }
+      );
+      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
+      else console.error("❌ Fehler beim Hinzufügen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
-      throw err;
     }
   }
-  
+
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) throw new Error("Emby-Konfiguration fehlt");
-  
-    const url = `${serverUrl}/Users/${userId}/FavoriteItems?ItemIds=${itemId}`;
-  
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
+
     try {
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          "X-Emby-Token": apiKey,
-          "Content-Type": "application/json"
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Favorit entfernen fehlgeschlagen: ${response.status}`);
-      }
-  
-      console.log(`✅ Item ${itemId} erfolgreich aus Favoriten entfernt`);
+      const res = await fetch(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
+      else console.error("❌ Fehler beim Entfernen:", res.status);
     } catch (err) {
-      console.error("💥 Fehler beim Entfernen des Favoriten:", err);
-      throw err;
+      console.error("💥 Fehler beim Entfernen:", err);
     }
   }
-
-
-
-
-  // 🩷 Klick-Handler für Herz-Buttons separat handhaben
-  attachFavListeners(listElement, cardInstance) {
-    listElement.addEventListener('click', async (e) => {
-      const button = e.target.closest('.fav-btn');
-      if (!button) return;
-      e.stopPropagation();
-  
-      const icon = button.querySelector('ha-icon');
-      const itemId = button.dataset.id;
-      const isFav = button.classList.toggle('favorited');
-  
-      icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-  
-      try {
-        if (isFav) {
-          await this.addToFavorites(cardInstance, itemId);
-          this._favoriteIds.add(itemId);
-        } else {
-          await this.removeFromFavorites(cardInstance, itemId);
-          this._favoriteIds.delete(itemId);
-        }
-      } catch (err) {
-        console.error("💥 Fehler beim Favorisieren:", err);
-        // Status zurücksetzen
-        button.classList.toggle('favorited', !isFav);
-        icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
-      }
-    });
-  }
-
-
-
 
   // 🖼️ Zufälliges Hintergrundbild
   getRandomArtwork(items) {
@@ -362,5 +271,3 @@ export class BaseSection {
     return randomItem.fanart || randomItem.backdrop || randomItem.banner;
   }
 }
-
-
