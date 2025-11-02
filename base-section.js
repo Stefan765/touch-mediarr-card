@@ -252,8 +252,9 @@ export class BaseSection {
 
     try {
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}`
+        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`
       )}`;
+
       const res = await fetch(proxyUrl, {
         method: "POST",
         headers: {
@@ -279,8 +280,9 @@ export class BaseSection {
 
     try {
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}`
+        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`
       )}`;
+
       const res = await fetch(proxyUrl, {
         method: "DELETE",
         headers: {
