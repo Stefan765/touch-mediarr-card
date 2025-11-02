@@ -218,8 +218,9 @@ export class BaseSection {
     try {
       // ✅ Proxy-URL über Home Assistant
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(
-        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite`
+        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`
       )}`;
+
   
       const res = await fetch(proxyUrl, {
         headers: {
