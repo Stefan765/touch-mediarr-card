@@ -233,6 +233,7 @@ export class BaseSection {
       const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
       
       const res = await fetch(url, {
+        method: 'POST',
         headers: {
           "X-Emby-Token": apiKey,
           "Accept": "application/json"
@@ -258,6 +259,7 @@ export class BaseSection {
       const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
       
       const res = await fetch(url, {
+        method: 'DELETE',
         headers: {
           "X-Emby-Token": apiKey,
           "Accept": "application/json"
