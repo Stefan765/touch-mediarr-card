@@ -554,7 +554,7 @@ export const styles = `
     color: #ff4081;
     font-size: 1.3em;
     cursor: pointer;
-    z-index: 10;
+    z-index: 1;
     pointer-events: auto;
     transition: transform 0.2s, color 0.3s;
   }
