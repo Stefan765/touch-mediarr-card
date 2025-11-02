@@ -1,13 +1,13 @@
 // main-card.js
-import { PlexSection } from './plex-section.js'; 
+#import { PlexSection } from './plex-section.js'; 
 import { JellyfinSection } from './jellyfin-section.js'; 
-import { SonarrSection } from './sonarr-section.js'; 
+#import { SonarrSection } from './sonarr-section.js'; 
 import { RadarrSection } from './radarr-section.js'; 
-import { SeerSection } from './seer-section.js'; 
-import { TMDBSection } from './tmdb-section.js'; 
-import { TraktSection } from './trakt-section.js'; 
-import { Sonarr2Section } from './sonarr2-section.js'; 
-import { Radarr2Section } from './radarr2-section.js';
+#import { SeerSection } from './seer-section.js'; 
+#import { TMDBSection } from './tmdb-section.js'; 
+#import { TraktSection } from './trakt-section.js'; 
+#import { Sonarr2Section } from './sonarr2-section.js'; 
+#import { Radarr2Section } from './radarr2-section.js';
 import { styles } from './styles.js';
 
 
@@ -21,15 +21,15 @@ class MediarrCard extends HTMLElement {
     this.progressInterval = null;
   
     this.sections = {
-      plex: new PlexSection(),
+      #plex: new PlexSection(),
       jellyfin: new JellyfinSection(),
-      sonarr: new SonarrSection(),
-      sonarr2: new Sonarr2Section(),
+      #sonarr: new SonarrSection(),
+      #sonarr2: new Sonarr2Section(),
       radarr: new RadarrSection(),
-      radarr2: new Radarr2Section(),
-      seer: new SeerSection(),
-      tmdb: new TMDBSection(),
-      trakt: new TraktSection()
+      #radarr2: new Radarr2Section(),
+      #seer: new SeerSection(),
+      #tmdb: new TMDBSection(),
+      #trakt: new TraktSection()
     };
   }
 
