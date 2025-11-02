@@ -236,6 +236,7 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
+    console.log("❤️ addToFavorites() triggered for", itemId);
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
