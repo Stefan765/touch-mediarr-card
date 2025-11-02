@@ -228,52 +228,54 @@ export class BaseSection {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`;
       
       const res = await fetch(url, {
         method: 'POST',
-        headers: {
-          "X-Emby-Token": apiKey,
-          "Accept": "application/json"
-        }
+        headers: { 'Accept': 'application/json' }
       });
-
-
-      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
-      else console.error("❌ Fehler beim Hinzufügen:", res.status);
+  
+      if (res.ok) {
+        console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
+      } else {
+        console.error("❌ Fehler beim Hinzufügen:", res.status);
+        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${res.status}`);
+      }
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
       throw err;
     }
   }
 
+
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`;
       
       const res = await fetch(url, {
         method: 'DELETE',
-        headers: {
-          "X-Emby-Token": apiKey,
-          "Accept": "application/json"
-        }
+        headers: { 'Accept': 'application/json' }
       });
-
-
-      if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
-      else console.error("❌ Fehler beim Entfernen:", res.status);
+  
+      if (res.ok) {
+        console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
+      } else {
+        console.error("❌ Fehler beim Entfernen:", res.status);
+        throw new Error(`Favorit entfernen fehlgeschlagen: ${res.status}`);
+      }
     } catch (err) {
       console.error("💥 Fehler beim Entfernen der Favoriten:", err);
       throw err;
     }
   }
+
 
   // 🩷 Klick-Handler für Herz-Buttons separat handhaben
   attachFavListeners(listElement, cardInstance) {
