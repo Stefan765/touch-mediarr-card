@@ -279,35 +279,33 @@ export class BaseSection {
 
   // 🩷 Klick-Handler für Herz-Buttons separat handhaben
   attachFavListeners(listElement, cardInstance) {
-    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
+    listElement.addEventListener('click', async (e) => {
+      const button = e.target.closest('.fav-btn');
+      if (!button) return; // Kein Herz gedrückt
+      e.stopPropagation();
   
-        const button = e.currentTarget;
-        const icon = button.querySelector('ha-icon');
-        const itemId = button.dataset.id;
-        const isFav = button.classList.toggle('favorited');
+      const icon = button.querySelector('ha-icon');
+      const itemId = button.dataset.id;
+      const isFav = button.classList.toggle('favorited');
   
-        console.log("💗 Favoriten-Button gedrückt:", itemId, isFav);
+      icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
   
-        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-  
-        try {
-          if (isFav) {
-            await this.addToFavorites(cardInstance, itemId);
-            this._favoriteIds.add(itemId);
-          } else {
-            await this.removeFromFavorites(cardInstance, itemId);
-            this._favoriteIds.delete(itemId);
-          }
-        } catch (err) {
-          console.error("💥 Fehler beim Favorisieren:", err);
-          button.classList.toggle('favorited', !isFav);
-          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
+      try {
+        if (isFav) {
+          await this.addToFavorites(cardInstance, itemId);
+          this._favoriteIds.add(itemId);
+        } else {
+          await this.removeFromFavorites(cardInstance, itemId);
+          this._favoriteIds.delete(itemId);
         }
-      });
+      } catch (err) {
+        console.error("💥 Fehler beim Favorisieren:", err);
+        button.classList.toggle('favorited', !isFav);
+        icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
+      }
     });
   }
+
 
 
   // 🖼️ Zufälliges Hintergrundbild
