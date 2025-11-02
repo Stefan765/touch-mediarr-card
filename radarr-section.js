@@ -8,13 +8,13 @@ export class RadarrSection extends BaseSection {
 
   updateInfo(cardInstance, item) {
     super.updateInfo(cardInstance, item);
+    
     if (!item) return;
 
-    // Favoritenstatus abfragen
-    const itemId = item.id || item.Id || item.ItemId || '';
-    const isFavorite = this._favoriteIds.has(itemId);
-    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
-    const favClass = isFavorite ? 'favorited' : '';
+    if (item.title_default) {
+      cardInstance.info.innerHTML = '';
+      return;
+    }
 
     const releaseYear = item.release || 'Unbekannt';
     const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
@@ -23,24 +23,32 @@ export class RadarrSection extends BaseSection {
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
+    const itemId = item.id || item.Id || item.ItemId || 'unknown';
+    const isFavorite = this._favoriteIds.has(itemId);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
+
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
       <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
       <div class="metadata">
         ${runtime ? `⏱️ ${runtime}` : ''} 
         ${rating ? ` | ⭐ ${rating}` : ''} 
-        ${itemId ? `<button class="fav-btn ${favClass}" data-id="${itemId}" title="Zu Favoriten hinzufügen">
-                      <ha-icon icon="${heartIcon}"></ha-icon>
-                    </button>` : ''}
+        <button class="fav-btn ${favClass}" data-id="${itemId}" title="Zu Favoriten hinzufügen">
+          <ha-icon icon="${heartIcon}"></ha-icon>
+        </button>
       </div>
       <div class="summary">${summary}</div>
     `;
+
+    // Herz-Button anklickbar machen
+    this.attachFavListeners(cardInstance.info, cardInstance);
   }
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
     if (!item || !item.poster || !item.title) return '';
 
-    const itemId = item.id || item.Id || item.ItemId || '';
+    const itemId = item.id || item.Id || item.ItemId || 'unknown';
     const isFavorite = this._favoriteIds.has(itemId);
     const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
     const favClass = isFavorite ? 'favorited' : '';
@@ -51,11 +59,11 @@ export class RadarrSection extends BaseSection {
            data-index="${index}">
         <img src="${item.poster}" alt="${item.title}">
         <div class="media-item-title">${item.title}</div>
-        ${itemId ? `<div class="media-item-footer">
-                      <button class="fav-btn ${favClass}" data-id="${itemId}" title="Favorit umschalten">
-                        <ha-icon icon="${heartIcon}"></ha-icon>
-                      </button>
-                    </div>` : ''}
+        <div class="media-item-footer">
+          <button class="fav-btn ${favClass}" data-id="${itemId}" title="Favorit umschalten">
+            <ha-icon icon="${heartIcon}"></ha-icon>
+          </button>
+        </div>
       </div>
     `;
   }
