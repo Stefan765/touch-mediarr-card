@@ -217,17 +217,15 @@ export class BaseSection {
   
     try {
       // ✅ Proxy-URL über Home Assistant
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(
-        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`
-      )}`;
-
-  
-      const res = await fetch(proxyUrl, {
+      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
+      
+      const res = await fetch(url, {
         headers: {
           "X-Emby-Token": apiKey,
-          Accept: "application/json",
-        },
+          "Accept": "application/json"
+        }
       });
+
   
       if (!res.ok) {
         console.error("❌ Emby-Favoriten konnten nicht geladen werden:", res.status);
