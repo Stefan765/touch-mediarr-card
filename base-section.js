@@ -99,37 +99,7 @@ export class BaseSection {
       )
       .join('');
 
-    this.addClickHandlers(cardInstance, listElement, items);
-    await this.attachFavListeners(listElement, cardInstance);
-    this.ensureStyles(cardInstance);
-
-    // ❤️ Klicklogik für Favoriten
-    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-
-        const button = e.currentTarget;
-        const icon = button.querySelector('ha-icon');
-        const itemId = button.dataset.id;
-        const isFav = button.classList.toggle('favorited');
-
-        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-
-        try {
-          if (isFav) {
-            await this.addToFavorites(cardInstance, itemId);
-            this._favoriteIds.add(itemId);
-          } else {
-            await this.removeFromFavorites(cardInstance, itemId);
-            this._favoriteIds.delete(itemId);
-          }
-        } catch {
-          // Bei Fehlern Herz zurücksetzen
-          button.classList.toggle('favorited', !isFav);
-          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
-        }
-      });
-    });
+  
 
     // 🎨 Hintergrund aktualisieren (max alle 30s)
     if (
