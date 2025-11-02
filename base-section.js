@@ -226,58 +226,55 @@ export class BaseSection {
   }
 
   // ❤️ Emby: Zu Favoriten hinzufügen
-  async addToFavorites(cardInstance, itemId) {
-    console.log("❤️ addToFavorites() triggered for", itemId);
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) return;
-  
+  async addToFavorites(itemId) {
     try {
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`;
-      
-      const res = await fetch(url, {
+      const userId = 'me'; // oder die echte User-ID
+      const apiKey = 'DEIN_EMBY_API_KEY'; // muss gesetzt sein
+  
+      const response = await fetch(`/emby/Users/${userId}/FavoriteItems?ItemIds=${itemId}`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' }
+        headers: {
+          'X-Emby-Token': apiKey,
+          'Content-Type': 'application/json'
+        },
       });
   
-      if (res.ok) {
-        console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
-      } else {
-        console.error("❌ Fehler beim Hinzufügen:", res.status);
-        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${response.status}`);
       }
+  
+      console.log('Erfolgreich favorisiert!');
     } catch (err) {
-      console.error("💥 Fehler beim Favorisieren:", err);
-      throw err;
+      console.error('💥 Fehler beim Favorisieren:', err);
     }
   }
+  
 
 
   // 💔 Emby: Aus Favoriten entfernen
-  async removeFromFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) return;
-  
+  async addToFavorites(itemId) {
     try {
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`;
-      
-      const res = await fetch(url, {
-        method: 'DELETE',
-        headers: { 'Accept': 'application/json' }
+      const userId = 'me'; // oder echte User-ID
+      const apiKey = 'DEIN_EMBY_API_KEY';
+  
+      const response = await fetch(`/emby/Users/${userId}/FavoriteItems?ItemIds=${itemId}`, {
+        method: 'POST',
+        headers: {
+          'X-Emby-Token': apiKey,
+          'Content-Type': 'application/json'
+        },
       });
   
-      if (res.ok) {
-        console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
-      } else {
-        console.error("❌ Fehler beim Entfernen:", res.status);
-        throw new Error(`Favorit entfernen fehlgeschlagen: ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${response.status}`);
       }
+  
+      console.log('✅ Erfolgreich favorisiert!');
     } catch (err) {
-      console.error("💥 Fehler beim Entfernen der Favoriten:", err);
-      throw err;
+      console.error('💥 Fehler beim Favorisieren:', err);
     }
   }
+
 
 
   // 🩷 Klick-Handler für Herz-Buttons separat handhaben
