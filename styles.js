@@ -209,6 +209,7 @@ export const styles = `
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
+    pointer-events: none;
   }
 
   .media-item::after {
