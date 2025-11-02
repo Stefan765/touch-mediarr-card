@@ -249,13 +249,16 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&Recursive=true&IncludeItemTypes=Movie,Series`;
-      
-      const res = await fetch(url, {
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}`
+      )}`;
+  
+      const res = await fetch(proxyUrl, {
+        method: "POST",
         headers: {
           "X-Emby-Token": apiKey,
-          "Accept": "application/json"
-        }
+          Accept: "application/json",
+        },
       });
 
 
