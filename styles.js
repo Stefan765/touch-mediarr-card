@@ -547,6 +547,8 @@ export const styles = `
   
   .fav-btn {
     position: absolute;
+    bottom: 6px;
+    right: 6px;
     background: none;
     border: none;
     color: #ff4081;
