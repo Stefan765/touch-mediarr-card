@@ -538,6 +538,7 @@ export const styles = `
   }
 
   .metadata {
+    gap: 6px;
     display: flex;
     align-items: center;
     gap: 6px; /* Abstand zwischen Rating und Button */
@@ -546,13 +547,12 @@ export const styles = `
   }
   
   .fav-btn {
-    position: absolute;
     bottom: 6px;
     right: 6px;
     background: none;
     border: none;
     color: #ff4081;
-    font-size: 1.3em;
+    font-size: 1.1em;
     cursor: pointer;
     z-index: 12;
     pointer-events: auto;
