@@ -68,6 +68,7 @@ export class BaseSection {
     const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
     const favClass = isFavorite ? 'favorited' : '';
   
+    // 🎬 Titel, Rating, Herz, Beschreibung
     cardInstance.info.innerHTML = `
       <div class="title-row" style="display:flex; align-items:center; gap:10px;">
         <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
@@ -76,14 +77,11 @@ export class BaseSection {
           <ha-icon icon="${heartIcon}"></ha-icon>
         </button>
       </div>
-      <div style="font-size: 10px; margin-top: 10px; color: yellow;">
-        <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
-        <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
-        <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
-      </div>
+  
+      ${item.overview ? `<div class="description" style="margin-top:5px; font-size: 13px; color: var(--secondary-text-color);">${item.overview}</div>` : ''}
     `;
   
-    // 🎯 Herzbutton oben funktional machen
+    // 💗 Herzbutton oben funktional machen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
     if (favBtn) {
       favBtn.addEventListener('click', async (e) => {
