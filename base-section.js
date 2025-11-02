@@ -214,17 +214,25 @@ export class BaseSection {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
       cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
-      const res = await fetch(url, {
+      // ✅ Proxy-URL über Home Assistant
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(
+        `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite`
+      )}`;
+  
+      const res = await fetch(proxyUrl, {
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "X-Emby-Token": apiKey,
+          Accept: "application/json",
+        },
       });
-      if (!res.ok) return;
-
+  
+      if (!res.ok) {
+        console.error("❌ Emby-Favoriten konnten nicht geladen werden:", res.status);
+        return;
+      }
+  
       const data = await res.json();
       const favorites = (data.Items || []).map((item) => item.Id);
       this._favoriteIds = new Set(favorites);
