@@ -99,6 +99,16 @@ export class BaseSection {
       )
       .join('');
 
+    // 💗 Herz-Klick-Handler hinzufügen
+    this.attachFavListeners(listElement, cardInstance);
+    
+    // 🎥 Klick-Handler für Cover (Infos anzeigen)
+    this.addClickHandlers(cardInstance, listElement, items);
+    
+    // 🎨 Styles sicherstellen
+    this.ensureStyles(cardInstance);
+
+
   
 
     // 🎨 Hintergrund aktualisieren (max alle 30s)
