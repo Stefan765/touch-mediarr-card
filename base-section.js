@@ -226,52 +226,56 @@ export class BaseSection {
   }
 
   // ❤️ Emby: Zu Favoriten hinzufügen
-  async addToFavorites(itemId) {
-    try {
-      const userId = 'me'; // oder die echte User-ID
-      const apiKey = 'DEIN_EMBY_API_KEY'; // muss gesetzt sein
+  async addToFavorites(cardInstance, itemId) {
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) throw new Error("Emby-Konfiguration fehlt");
   
-      const response = await fetch(`/emby/Users/${userId}/FavoriteItems?ItemIds=${itemId}`, {
-        method: 'POST',
+    const url = `${serverUrl}/Users/${userId}/FavoriteItems?ItemIds=${itemId}`;
+  
+    try {
+      const response = await fetch(url, {
+        method: "POST",
         headers: {
-          'X-Emby-Token': apiKey,
-          'Content-Type': 'application/json'
-        },
+          "X-Emby-Token": apiKey,
+          "Content-Type": "application/json"
+        }
       });
   
       if (!response.ok) {
         throw new Error(`Favorit hinzufügen fehlgeschlagen: ${response.status}`);
       }
   
-      console.log('Erfolgreich favorisiert!');
+      console.log(`✅ Item ${itemId} erfolgreich favorisiert`);
     } catch (err) {
-      console.error('💥 Fehler beim Favorisieren:', err);
+      console.error("💥 Fehler beim Favorisieren:", err);
+      throw err;
     }
   }
   
-
-
   // 💔 Emby: Aus Favoriten entfernen
-  async removeFromFavorites(itemId) {
-    try {
-      const userId = 'me'; // oder echte User-ID
-      const apiKey = 'DEIN_EMBY_API_KEY';
+  async removeFromFavorites(cardInstance, itemId) {
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) throw new Error("Emby-Konfiguration fehlt");
   
-      const response = await fetch(`/emby/Users/${userId}/FavoriteItems?ItemIds=${itemId}`, {
-        method: 'DELETE',
+    const url = `${serverUrl}/Users/${userId}/FavoriteItems?ItemIds=${itemId}`;
+  
+    try {
+      const response = await fetch(url, {
+        method: "DELETE",
         headers: {
-          'X-Emby-Token': apiKey,
-          'Content-Type': 'application/json'
-        },
+          "X-Emby-Token": apiKey,
+          "Content-Type": "application/json"
+        }
       });
   
       if (!response.ok) {
         throw new Error(`Favorit entfernen fehlgeschlagen: ${response.status}`);
       }
   
-      console.log('✅ Erfolgreich entfernt!');
+      console.log(`✅ Item ${itemId} erfolgreich aus Favoriten entfernt`);
     } catch (err) {
-      console.error('💥 Fehler beim Entfernen des Favoriten:', err);
+      console.error("💥 Fehler beim Entfernen des Favoriten:", err);
+      throw err;
     }
   }
 
