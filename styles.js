@@ -553,11 +553,6 @@ export const styles = `
     transition: transform 0.2s, color 0.3s;
   }
 
-  .media-item-title {
-    position: relative;
-    z-index: 1;           /* kleiner als Footer/Button */
-  }
-  
   .fav-btn:hover {
     transform: scale(1.2);
     color: #ff79a8;
