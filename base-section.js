@@ -51,28 +51,65 @@ export class BaseSection {
   // 📋 Infoanzeige (oben im Detail)
   updateInfo(cardInstance, item) {
     if (!item) return;
-
+  
     const mediaBackground = item.banner || item.fanart;
     const cardBackground = item.fanart || item.banner;
-
+  
     if (mediaBackground) {
       cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
       cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
     }
-
+  
     if (cardBackground && cardInstance.cardBackground) {
       cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
     }
-
+  
+    const isFavorite = this._favoriteIds.has(item.id);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
+  
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+      <div class="title-row" style="display:flex; align-items:center; gap:10px;">
+        <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
+        ${item.rating ? `<div class="rating">⭐ ${item.rating.toFixed(1)}</div>` : ''}
+        <button class="fav-btn ${favClass}" data-id="${item.id}" title="Favorit umschalten">
+          <ha-icon icon="${heartIcon}"></ha-icon>
+        </button>
+      </div>
       <div style="font-size: 10px; margin-top: 10px; color: yellow;">
         <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
         <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
         <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
       </div>
     `;
+  
+    // 🎯 Herzbutton oben funktional machen
+    const favBtn = cardInstance.info.querySelector('.fav-btn');
+    if (favBtn) {
+      favBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const icon = favBtn.querySelector('ha-icon');
+        const itemId = favBtn.dataset.id;
+        const isFav = favBtn.classList.toggle('favorited');
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+  
+        try {
+          if (isFav) {
+            await this.addToFavorites(cardInstance, itemId);
+            this._favoriteIds.add(itemId);
+          } else {
+            await this.removeFromFavorites(cardInstance, itemId);
+            this._favoriteIds.delete(itemId);
+          }
+        } catch (err) {
+          console.error('💥 Fehler beim Favorisieren:', err);
+          favBtn.classList.toggle('favorited', !isFav);
+          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
+        }
+      });
+    }
   }
+
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
