@@ -545,11 +545,14 @@ export const styles = `
   }
   
   .fav-btn {
+    position: absolute;
     background: none;
     border: none;
     color: #ff4081;
     font-size: 1.3em;
     cursor: pointer;
+    z-index: 5;
+    pointer-events: auto;
     transition: transform 0.2s, color 0.3s;
   }
 
