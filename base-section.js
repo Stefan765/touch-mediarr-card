@@ -25,10 +25,12 @@ export class BaseSection {
   // 🎬 Einzelnes Medien-Item (Poster + Sterne + Herz)
   generateMediaItem(item, index, selectedType, selectedIndex) {
     console.log("🎬 generateMediaItem() called for:", item.title, item.id);
-    const isFavorite = item.isFavorite || false;
+  
+    // Favoritenstatus direkt aus _favoriteIds
+    const isFavorite = this._favoriteIds.has(item.id);
     const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
     const favClass = isFavorite ? "favorited" : "";
-
+  
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
@@ -44,6 +46,7 @@ export class BaseSection {
       </div>
     `;
   }
+
 
   // 📋 Infoanzeige (oben im Detail)
   updateInfo(cardInstance, item) {
