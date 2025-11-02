@@ -34,7 +34,7 @@ export class RadarrSection extends BaseSection {
         ${runtime ? `⏱️ ${runtime}` : ''} 
         ${rating ? ` | ⭐ ${rating}` : ''} 
         <button class="fav-btn" 
-                data-id="${item.id}" 
+                data-id="${item.id || item.Id || item.ItemId || ''}" 
                 title="Zu Favoriten hinzufügen">
           ♡
         </button>
