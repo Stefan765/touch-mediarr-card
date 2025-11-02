@@ -296,6 +296,39 @@ export class BaseSection {
     }
   }
 
+  // 🩷 Klick-Handler für Herz-Buttons separat handhaben
+  attachFavListeners(listElement, cardInstance) {
+    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+  
+        const button = e.currentTarget;
+        const icon = button.querySelector('ha-icon');
+        const itemId = button.dataset.id;
+        const isFav = button.classList.toggle('favorited');
+  
+        console.log("💗 Favoriten-Button gedrückt:", itemId, isFav);
+  
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+  
+        try {
+          if (isFav) {
+            await this.addToFavorites(cardInstance, itemId);
+            this._favoriteIds.add(itemId);
+          } else {
+            await this.removeFromFavorites(cardInstance, itemId);
+            this._favoriteIds.delete(itemId);
+          }
+        } catch (err) {
+          console.error("💥 Fehler beim Favorisieren:", err);
+          button.classList.toggle('favorited', !isFav);
+          icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
+        }
+      });
+    });
+  }
+
+
   // 🖼️ Zufälliges Hintergrundbild
   getRandomArtwork(items) {
     if (!items || items.length === 0) return null;
@@ -309,35 +342,4 @@ export class BaseSection {
   }
 }
 
-// 🩷 Klick-Handler für Herz-Buttons separat handhaben
-attachFavListeners(listElement, cardInstance) {
-  listElement.querySelectorAll('.fav-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-
-      const button = e.currentTarget;
-      const icon = button.querySelector('ha-icon');
-      const itemId = button.dataset.id;
-      const isFav = button.classList.toggle('favorited');
-
-      console.log("💗 Favoriten-Button gedrückt:", itemId, isFav);
-
-      icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-
-      try {
-        if (isFav) {
-          await this.addToFavorites(cardInstance, itemId);
-          this._favoriteIds.add(itemId);
-        } else {
-          await this.removeFromFavorites(cardInstance, itemId);
-          this._favoriteIds.delete(itemId);
-        }
-      } catch (err) {
-        console.error("💥 Fehler beim Favorisieren:", err);
-        button.classList.toggle('favorited', !isFav);
-        icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
-      }
-    });
-  });
-}
 
