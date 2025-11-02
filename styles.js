@@ -80,7 +80,7 @@ export const styles = `
   }
 
   .media-info {
-    position: absolute;
+    position: relative;
     bottom: auto;
     left: 0;
     right: 0;
