@@ -7,18 +7,15 @@ export class JellyfinSection extends BaseSection {
   }
 
   updateInfo(cardInstance, item) {
-    // Standard-Handling aus der Basisklasse (z. B. Hintergrundbild)
     super.updateInfo(cardInstance, item);
-
     if (!item) return;
 
-    // Wenn es sich um den Platzhalter handelt, nichts anzeigen
-    if (item.title_default) {
-      cardInstance.info.innerHTML = '';
-      return;
-    }
+    // Favoritenstatus abfragen
+    const itemId = item.id || item.Id || '';
+    const isFavorite = this._favoriteIds.has(itemId);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
 
-    // Daten aus der Entität aufbereiten
     const releaseYear = item.release || 'Unbekannt';
     const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
     const genres = item.genres || '';
@@ -26,36 +23,41 @@ export class JellyfinSection extends BaseSection {
     const studio = item.studio || '';
     const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
-    // HTML-Inhalt für die Infobox
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
       <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
       <div class="metadata">
         ${runtime ? `⏱️ ${runtime}` : ''} 
         ${rating ? ` | ⭐ ${rating}` : ''} 
-        <button class="fav-btn" 
-                data-id="${item.id || item.Id || item.ItemId || ''}"  
-                title="Zu Favoriten hinzufügen">
-          ♡
-        </button>
+        ${itemId ? `<button class="fav-btn ${favClass}" data-id="${itemId}" title="Zu Favoriten hinzufügen">
+                      <ha-icon icon="${heartIcon}"></ha-icon>
+                    </button>` : ''}
       </div>
       <div class="summary">${summary}</div>
     `;
   }
 
-    generateMediaItem(item, index, selectedType, selectedIndex) {
-    // Prüfen, ob item existiert und notwendige Felder hat
-    if (!item || !item.poster || !item.title) return ''; // Nichts rendern, wenn Daten fehlen
-  
-    // Film-Cover anzeigen
+  generateMediaItem(item, index, selectedType, selectedIndex) {
+    if (!item || !item.poster || !item.title) return '';
+
+    const itemId = item.id || item.Id || '';
+    const isFavorite = this._favoriteIds.has(itemId);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
+
     return `
       <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
            data-type="${this.key}"
            data-index="${index}">
         <img src="${item.poster}" alt="${item.title}">
         <div class="media-item-title">${item.title}</div>
+        <div class="media-item-footer">
+          ${item.rating ? `<span class="rating">⭐ ${item.rating}</span>` : ''}
+          ${itemId ? `<button class="fav-btn ${favClass}" data-id="${itemId}" title="Favorit umschalten">
+                        <ha-icon icon="${heartIcon}"></ha-icon>
+                      </button>` : ''}
+        </div>
       </div>
     `;
   }
 }
- 
