@@ -252,13 +252,13 @@ export class BaseSection {
 
 
   // 💔 Emby: Aus Favoriten entfernen
-  async addToFavorites(itemId) {
+  async removeFromFavorites(itemId) {
     try {
       const userId = 'me'; // oder echte User-ID
       const apiKey = 'DEIN_EMBY_API_KEY';
   
       const response = await fetch(`/emby/Users/${userId}/FavoriteItems?ItemIds=${itemId}`, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'X-Emby-Token': apiKey,
           'Content-Type': 'application/json'
@@ -266,14 +266,15 @@ export class BaseSection {
       });
   
       if (!response.ok) {
-        throw new Error(`Favorit hinzufügen fehlgeschlagen: ${response.status}`);
+        throw new Error(`Favorit entfernen fehlgeschlagen: ${response.status}`);
       }
   
-      console.log('✅ Erfolgreich favorisiert!');
+      console.log('✅ Erfolgreich entfernt!');
     } catch (err) {
-      console.error('💥 Fehler beim Favorisieren:', err);
+      console.error('💥 Fehler beim Entfernen des Favoriten:', err);
     }
   }
+
 
 
 
