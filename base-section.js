@@ -286,7 +286,7 @@ export class BaseSection {
   attachFavListeners(listElement, cardInstance) {
     listElement.addEventListener('click', async (e) => {
       const button = e.target.closest('.fav-btn');
-      if (!button) return; // Kein Herz gedrückt
+      if (!button) return;
       e.stopPropagation();
   
       const icon = button.querySelector('ha-icon');
@@ -305,11 +305,13 @@ export class BaseSection {
         }
       } catch (err) {
         console.error("💥 Fehler beim Favorisieren:", err);
+        // Status zurücksetzen
         button.classList.toggle('favorited', !isFav);
         icon.setAttribute('icon', !isFav ? 'mdi:heart' : 'mdi:heart-outline');
       }
     });
   }
+
 
 
 
