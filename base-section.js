@@ -250,16 +250,17 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const res = await fetch(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
-          }
-        }
-      );
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}`
+      )}`;
+      const res = await fetch(proxyUrl, {
+        method: "POST",
+        headers: {
+          "X-Emby-Token": apiKey,
+          Accept: "application/json",
+        },
+      });
+
 
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
@@ -276,16 +277,17 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const res = await fetch(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        {
-          method: "DELETE",
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
-          }
-        }
-      );
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(
+        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}`
+      )}`;
+      const res = await fetch(proxyUrl, {
+        method: "DELETE",
+        headers: {
+          "X-Emby-Token": apiKey,
+          Accept: "application/json",
+        },
+      });
+
 
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
