@@ -73,74 +73,99 @@ export class BaseSection {
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
-    const maxItems = cardInstance.config[`${this.key}_max_items`] || cardInstance.config.max_items || 10;
-
-    // 🧠 Items aus Home Assistant Entität
-    let items = entity.attributes.data || [];
-    
-    // Wenn data ein String ist → parse es als JSON
+    const maxItems =
+      cardInstance.config[`${this.key}_max_items`] ||
+      cardInstance.config.max_items ||
+      10;
+  
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
+  
+    if (!serverUrl || !apiKey || !userId) {
+      console.error("❌ Emby-Konfiguration unvollständig!");
+      return;
+    }
+  
+    let items = entity?.attributes?.data || [];
+  
+    // 🧠 Daten prüfen — falls als String geliefert, in Array umwandeln
     if (typeof items === "string") {
       try {
         items = JSON.parse(items);
       } catch (e) {
-        console.warn("⚠️ Konnte data nicht parsen:", e, items);
+        console.warn("⚠️ Konnte 'data' nicht parsen:", e, items);
         items = [];
       }
     }
-    
-    // Falls nur 1 Objekt drin ist → zu Array machen
+  
+    // Falls kein Array → sicherstellen, dass wir ein Array haben
     if (!Array.isArray(items)) {
       items = [items];
     }
-
-
-    // 🩷 Favoriten aus Emby abrufen
+  
+    // Header-Objekt entfernen (das erste Element mit title_default)
+    if (items.length && items[0].title_default) {
+      items = items.slice(1);
+    }
+  
+    // ✅ Items aus Emby mit Favoritenstatus abgleichen
     await this.fetchFavoritesFromEmby(cardInstance);
-
-    // 🧩 Favoriten markieren
-    items.forEach(item => {
-      item.isFavorite = item.Id ? this._favoriteIds.has(item.Id.toString()) : false;
-    });
-
+  
+    items = items.map((i) => ({
+      Id: i.id || i.Id || null,
+      title: i.title || i.Name || "Unbekannt",
+      poster:
+        i.poster ||
+        `${serverUrl}/Items/${i.id || i.Id}/Images/Primary?api_key=${apiKey}`,
+      rating: i.rating || "",
+      year: i.release || i.ProductionYear || "",
+      isFavorite: this._favoriteIds.has((i.id || i.Id || "").toString()),
+    }));
+  
+    console.log("📦 Verarbeitete Items:", items.length, items);
+  
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
     if (!listElement) return;
-
+  
     listElement.innerHTML = items
-      .map((item, index) => this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex))
-      .join('');
-
-    // 💖 Favoriten-Klicklogik
-    listElement.querySelectorAll('.fav-btn').forEach(btn => {
-      btn.addEventListener('click', async e => {
+      .slice(0, maxItems)
+      .map((item, index) =>
+        this.generateMediaItem(
+          item,
+          index,
+          cardInstance.selectedType,
+          cardInstance.selectedIndex
+        )
+      )
+      .join("");
+  
+    // 💖 Klick-Logik für Favoriten
+    listElement.querySelectorAll(".fav-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const button = e.currentTarget;
         const itemId = button.dataset.id;
-        const icon = button.querySelector('ha-icon');
-        const isFav = button.classList.toggle('favorited');
-        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-
+        const icon = button.querySelector("ha-icon");
+  
+        if (!itemId) {
+          console.error("❌ Keine gültige Item-ID!");
+          return;
+        }
+  
+        const isFav = button.classList.toggle("favorited");
+        icon.setAttribute("icon", isFav ? "mdi:heart" : "mdi:heart-outline");
+  
         if (isFav) {
           await this.addToFavorites(cardInstance, itemId);
-          this._favoriteIds.add(itemId);
         } else {
           await this.removeFromFavorites(cardInstance, itemId);
-          this._favoriteIds.delete(itemId);
         }
       });
     });
-
-    // 🎨 Hintergrund max. alle 30s
-    if (cardInstance.cardBackground && (!this._lastBackgroundUpdate || Date.now() - this._lastBackgroundUpdate > 30000)) {
-      const bgImage = this.getRandomArtwork(items);
-      if (bgImage) {
-        cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
-        this._lastBackgroundUpdate = Date.now();
-      }
-    }
-
-    this.addClickHandlers(cardInstance, listElement, items);
+  
     this.ensureStyles(cardInstance);
   }
+
 
   // 🎥 Klick auf Medien-Item (Detailanzeige)
   addClickHandlers(cardInstance, listElement, items) {
