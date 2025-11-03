@@ -6,6 +6,7 @@ export class BaseSection {
     this._favoriteIds = new Set(); // 🩷 lokale Favoritenliste aus Emby
   }
 
+  // 🏗️ Template für die Sektion
   generateTemplate() {
     return `
       <div class="section" data-section="${this.key}">
@@ -24,7 +25,6 @@ export class BaseSection {
 
   // 🎬 Einzelnes Medien-Item (Poster + Sterne + Herz)
   generateMediaItem(item, index, selectedType, selectedIndex) {
-    console.log("🎬 generateMediaItem() called for:", item.title, item.id);
     const isFavorite = item.isFavorite || false;
     const heartIcon = isFavorite ? "mdi:heart" : "mdi:heart-outline";
     const favClass = isFavorite ? "favorited" : "";
@@ -37,7 +37,7 @@ export class BaseSection {
         <div class="media-item-title">${item.title}</div>
         <div class="media-item-footer">
           ${item.rating ? `<span class="rating">⭐ ${item.rating.toFixed(1)}</span>` : ''}
-          <button class="fav-btn ${favClass}" data-id="${item.id}" title="Favorit umschalten">
+          <button class="fav-btn ${favClass}" data-id="${item.Id}" title="Favorit umschalten">
             <ha-icon icon="${heartIcon}"></ha-icon>
           </button>
         </div>
@@ -45,7 +45,7 @@ export class BaseSection {
     `;
   }
 
-  // 📋 Infoanzeige (oben im Detail)
+  // 📋 Detailinfo oben
   updateInfo(cardInstance, item) {
     if (!item) return;
 
@@ -73,51 +73,36 @@ export class BaseSection {
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
-    const maxItems =
-      cardInstance.config[`${this.key}_max_items`] ||
-      cardInstance.config.max_items ||
-      10;
+    const maxItems = cardInstance.config[`${this.key}_max_items`] || cardInstance.config.max_items || 10;
 
+    // 🧠 Items aus Home Assistant Entität
     let items = entity.attributes.data || [];
     items = items.slice(0, maxItems);
 
-    // 🩷 Vorab Favoritenliste aus Emby laden
+    // 🩷 Favoriten aus Emby abrufen
     await this.fetchFavoritesFromEmby(cardInstance);
 
-    // 🧩 Markiere Favoriten in den Items
-    items.forEach((item) => {
-      const itemId = item.id || item.Id;
-      item.isFavorite = this._favoriteIds.has(itemId);
+    // 🧩 Favoriten markieren
+    items.forEach(item => {
+      item.isFavorite = item.Id ? this._favoriteIds.has(item.Id.toString()) : false;
     });
 
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
     if (!listElement) return;
 
     listElement.innerHTML = items
-      .map((item, index) =>
-        this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
-      )
+      .map((item, index) => this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex))
       .join('');
-      console.log("🔍 Favoriten-Buttons gefunden:", listElement.querySelectorAll('.fav-btn').length);
 
-
-    this.addClickHandlers(cardInstance, listElement, items);
-    this.ensureStyles(cardInstance);
-
-    // ❤️ Klicklogik für Favoriten
-    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
+    // 💖 Favoriten-Klicklogik
+    listElement.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', async e => {
         e.stopPropagation();
-        console.log("Favoriten-Button geklickt, ID:", btn.dataset.id);
-
         const button = e.currentTarget;
-        const icon = button.querySelector('ha-icon');
         const itemId = button.dataset.id;
+        const icon = button.querySelector('ha-icon');
         const isFav = button.classList.toggle('favorited');
-        console.log("Favoritenstatus jetzt:", isFav);
-
         icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
-        console.log("Icon geändert zu:", icon.getAttribute('icon'));
 
         if (isFav) {
           await this.addToFavorites(cardInstance, itemId);
@@ -129,25 +114,24 @@ export class BaseSection {
       });
     });
 
-    // 🎨 Hintergrund aktualisieren (max alle 30s)
-    if (
-      cardInstance.cardBackground &&
-      (!this._lastBackgroundUpdate ||
-        Date.now() - this._lastBackgroundUpdate > 30000)
-    ) {
+    // 🎨 Hintergrund max. alle 30s
+    if (cardInstance.cardBackground && (!this._lastBackgroundUpdate || Date.now() - this._lastBackgroundUpdate > 30000)) {
       const bgImage = this.getRandomArtwork(items);
       if (bgImage) {
         cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
         this._lastBackgroundUpdate = Date.now();
       }
     }
+
+    this.addClickHandlers(cardInstance, listElement, items);
+    this.ensureStyles(cardInstance);
   }
 
-  // 🎥 Klick auf Medien-Item (zum Anzeigen der Info)
+  // 🎥 Klick auf Medien-Item (Detailanzeige)
   addClickHandlers(cardInstance, listElement, items) {
-    listElement.querySelectorAll('.media-item').forEach((item) => {
-      item.onclick = () => {
-        const index = parseInt(item.dataset.index);
+    listElement.querySelectorAll('.media-item').forEach(itemEl => {
+      itemEl.onclick = () => {
+        const index = parseInt(itemEl.dataset.index);
         const selectedItem = items[index];
 
         cardInstance.selectedType = this.key;
@@ -156,26 +140,19 @@ export class BaseSection {
         const mediaBackground = selectedItem.banner || selectedItem.fanart;
         const cardBackground = selectedItem.fanart || selectedItem.banner;
 
-        if (mediaBackground) {
-          cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
-        }
-        if (cardBackground) {
-          cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
-        }
+        if (mediaBackground) cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
+        if (cardBackground) cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
 
         this.updateInfo(cardInstance, selectedItem);
 
-        cardInstance.querySelectorAll('.media-item').forEach((i) => {
-          i.classList.toggle(
-            'selected',
-            i.dataset.type === this.key && parseInt(i.dataset.index) === index
-          );
+        cardInstance.querySelectorAll('.media-item').forEach(i => {
+          i.classList.toggle('selected', i.dataset.type === this.key && parseInt(i.dataset.index) === index);
         });
       };
     });
   }
 
-  // 🎨 CSS für Herzbutton injizieren
+  // 🎨 CSS für Herzbutton
   ensureStyles(cardInstance) {
     const card = cardInstance.closest('ha-card');
     if (card && !card.querySelector('style[data-fav-style]')) {
@@ -208,59 +185,48 @@ export class BaseSection {
     }
   }
 
- // 🧠 Favoriten abrufen (einmal pro Update)
+  // 🧠 Emby-Favoriten abrufen
   async fetchFavoritesFromEmby(cardInstance) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const url = `${serverUrl}/emby/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
+      const url = `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Movie,Series&Filters=IsFavorite&api_key=${apiKey}`;
       const res = await fetch(url);
       if (!res.ok) return;
 
       const data = await res.json();
-      const favorites = (data.Items || []).map((item) => item.Id);
+      const favorites = (data.Items || []).map(item => item.Id);
       this._favoriteIds = new Set(favorites);
       console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
     } catch (err) {
       console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
-  }   
+  }
 
-  // ❤️ Emby: Zu Favoriten hinzufügen
+  // ❤️ Emby: Favorit hinzufügen
   async addToFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) return;
-    if (!itemId) {
-      console.error("❌ Keine gültige Item-ID übergeben!");
-      return;
-    }
-  
+    if (!serverUrl || !apiKey || !userId || !itemId) return;
+
     try {
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Client=Emby+Web&X-Emby-Device-Name=Edge+Windows&X-Emby-Device-Id=4f45ae69-e016-431b-9308-27005faf01bf&X-Emby-Client-Version=4.9.2.6&X-Emby-Token=${apiKey}`;
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
       const res = await fetch(url, { method: "POST" });
-      
       if (res.ok) console.log(`✅ Item ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status, await res.text());
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
   }
-  
-  // 💔 Emby: Aus Favoriten entfernen
+
+  // 💔 Emby: Favorit entfernen
   async removeFromFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) return;
-    if (!itemId) {
-      console.error("❌ Keine gültige Item-ID übergeben!");
-      return;
-    }
-  
+    if (!serverUrl || !apiKey || !userId || !itemId) return;
+
     try {
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Client=Emby+Web&X-Emby-Device-Name=Edge+Windows&X-Emby-Device-Id=4f45ae69-e016-431b-9308-27005faf01bf&X-Emby-Client-Version=4.9.2.6&X-Emby-Token=${apiKey}`;
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
       const res = await fetch(url, { method: "DELETE" });
-      
       if (res.ok) console.log(`🗑️ Item ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status, await res.text());
     } catch (err) {
@@ -268,20 +234,12 @@ export class BaseSection {
     }
   }
 
-
-
-  
-
   // 🖼️ Zufälliges Hintergrundbild
   getRandomArtwork(items) {
     if (!items || items.length === 0) return null;
-    const validItems = items.filter(
-      (item) => item.fanart || item.backdrop || item.banner
-    );
+    const validItems = items.filter(item => item.fanart || item.backdrop || item.banner);
     if (validItems.length === 0) return null;
-    const randomItem =
-      validItems[Math.floor(Math.random() * validItems.length)];
+    const randomItem = validItems[Math.floor(Math.random() * validItems.length)];
     return randomItem.fanart || randomItem.backdrop || randomItem.banner;
   }
 }
-
