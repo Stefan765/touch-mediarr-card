@@ -112,8 +112,10 @@ export class BaseSection {
         const icon = button.querySelector('ha-icon');
         const itemId = button.dataset.id;
         const isFav = button.classList.toggle('favorited');
+        console.log("Favoritenstatus jetzt:", isFav);
 
         icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+        console.log("Icon geändert zu:", icon.getAttribute('icon'));
 
         if (isFav) {
           await this.addToFavorites(cardInstance, itemId);
