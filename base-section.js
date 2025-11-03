@@ -230,30 +230,45 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
-    if (!serverUrl || !apiKey) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    
+    // Prüfen, ob alle wichtigen Werte vorhanden sind
+    if (!serverUrl || !apiKey || !userId) {
+      console.error("❌ Emby-Konfiguration unvollständig!");
+      return;
+    }
+    
+    // Prüfen, ob itemId gültig ist
+    if (!itemId || typeof itemId !== "string" || itemId.trim() === "") {
+      console.error("❌ Ungültige Item-ID:", itemId);
+      return;
+    }
   
-    // Füge Header mit allen X-Emby-Infos hinzu
-    const headers = {
-      "X-Emby-Client": "Emby Web",
-      "X-Emby-Device-Name": "Edge Windows",
-      "X-Emby-Device-Id": "4f45ae69-e016-431b-9308-27005faf01bf",
-      "X-Emby-Client-Version": "4.9.2.6",
-      "X-Emby-Token": apiKey
-    };
-  
+    const url = `${serverUrl}/Items/${itemId}/Favorite`;
+    
     try {
-      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
+      const res = await fetch(url, {
         method: "POST",
-        headers
+        headers: {
+          "X-Emby-Token": apiKey,
+          "X-Emby-Client": "Emby Web",
+          "X-Emby-Device-Name": "Edge Windows",
+          "X-Emby-Device-Id": "4f45ae69-e016-431b-9308-27005faf01bf",
+          "X-Emby-Client-Version": "4.9.2.6",
+          "X-Emby-Language": "de",
+          "Content-Type": "application/json"
+        }
       });
   
-      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
-      else console.error("❌ Fehler beim Hinzufügen:", res.status, await res.text());
+      if (res.ok) console.log(`✅ Favorit hinzugefügt: ${itemId}`);
+      else {
+        console.error("❌ Fehler beim Hinzufügen:", res.status, await res.text());
+      }
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
   }
+
 
   
   // 💔 Emby: Aus Favoriten entfernen
