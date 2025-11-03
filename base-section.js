@@ -229,8 +229,8 @@ export class BaseSection {
   }   
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
-    if (!serverUrl || !apiKey) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
   
     try {
       const url = `${serverUrl}/emby/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
@@ -245,11 +245,12 @@ export class BaseSection {
     }
   }
 
+
   
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
-    if (!serverUrl || !apiKey) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
   
     try {
       const url = `${serverUrl}/emby/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
@@ -263,6 +264,7 @@ export class BaseSection {
       console.error("💥 Fehler beim Entfernen:", err);
     }
   }
+
 
 
   
