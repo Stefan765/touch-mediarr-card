@@ -284,3 +284,4 @@ export class BaseSection {
     return randomItem.fanart || randomItem.backdrop || randomItem.banner;
   }
 }
+
