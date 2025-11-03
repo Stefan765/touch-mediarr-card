@@ -230,10 +230,11 @@ export class BaseSection {
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
-    if (!serverUrl || !apiKey || !itemId) return;
+    if (!serverUrl || !apiKey) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
+      const url = `${serverUrl}/Items/${itemId}/Favorite`;
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           "X-Emby-Token": apiKey,
@@ -246,14 +247,16 @@ export class BaseSection {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
   }
+
   
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId || !itemId) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
+    if (!serverUrl || !apiKey) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems/${itemId}/Delete`, {
+      const url = `${serverUrl}/Items/${itemId}/Unfavorite`;
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           "X-Emby-Token": apiKey,
@@ -266,6 +269,7 @@ export class BaseSection {
       console.error("💥 Fehler beim Entfernen:", err);
     }
   }
+
 
   
 
