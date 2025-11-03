@@ -98,6 +98,8 @@ export class BaseSection {
         this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
       )
       .join('');
+      console.log("🔍 Favoriten-Buttons gefunden:", listElement.querySelectorAll('.fav-btn').length);
+
 
     this.addClickHandlers(cardInstance, listElement, items);
     this.ensureStyles(cardInstance);
