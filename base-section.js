@@ -234,10 +234,10 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems?api_key=${apiKey}`, {
+      const res = await fetch(`${serverUrl}/Users/${userId}/Favorite?api_key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ItemIds: [itemId] }),
+        
       });
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
@@ -252,10 +252,10 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems?api_key=${apiKey}`, {
-        method: "DELETE",
+      const res = await fetch(`${serverUrl}/Users/${userId}/Unfavorite?api_key=${apiKey}`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ItemIds: [itemId] }),
+        
       });
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
