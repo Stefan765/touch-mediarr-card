@@ -77,7 +77,22 @@ export class BaseSection {
 
     // 🧠 Items aus Home Assistant Entität
     let items = entity.attributes.data || [];
-    items = items.slice(0, maxItems);
+    
+    // Wenn data ein String ist → parse es als JSON
+    if (typeof items === "string") {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        console.warn("⚠️ Konnte data nicht parsen:", e, items);
+        items = [];
+      }
+    }
+    
+    // Falls nur 1 Objekt drin ist → zu Array machen
+    if (!Array.isArray(items)) {
+      items = [items];
+    }
+
 
     // 🩷 Favoriten aus Emby abrufen
     await this.fetchFavoritesFromEmby(cardInstance);
