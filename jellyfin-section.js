@@ -37,7 +37,7 @@ export class JellyfinSection extends BaseSection {
       </div>
       <div class="summary">${summary}</div>
     `;
-  }
+
 
     // 💖 Klick-Handler für den Herz-Button hinzufügen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
