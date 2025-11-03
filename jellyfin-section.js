@@ -10,6 +10,7 @@ export class JellyfinSection extends BaseSection {
    * 🩷 Detailbereich mit Film-Infos und Herzbutton aktualisieren
    */
   updateInfo(cardInstance, item) {
+    super.updateInfo(cardInstance, item); // ⬅️ wieder hinzufügen
     if (!item) return;
 
     const itemId = item.Id ?? item.id ?? item.ItemId ?? item.IdString ?? null;
@@ -48,11 +49,8 @@ export class JellyfinSection extends BaseSection {
     // 💖 Klick-Handler für den Herz-Button hinzufügen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
     if (favBtn) {
-      console.log("🩷 Favoriten-Button gefunden:", item.title);
-
       favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        console.log("💥 Favoriten-Klick erkannt:", item.title);
 
         const icon = favBtn.querySelector('ha-icon');
         const isFav = favBtn.classList.toggle('favorited');
@@ -66,9 +64,10 @@ export class JellyfinSection extends BaseSection {
             await this.removeFromFavorites(cardInstance, itemId);
             this._favoriteIds.delete(itemId);
           }
+
           console.log(`❤️ Favorit für ${item.title}:`, isFav);
 
-          // 🩶 Optional: Synchronisiere mit der Liste
+          // 🔄 Synchronisierung mit der Liste
           const listBtn = cardInstance.querySelector(`.jellyfin-list .fav-btn[data-id="${itemId}"]`);
           if (listBtn) {
             listBtn.classList.toggle('favorited', isFav);
@@ -76,7 +75,7 @@ export class JellyfinSection extends BaseSection {
             if (listIcon) listIcon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
           }
         } catch (err) {
-          console.error("❌ Fehler beim Favorisieren:", err);
+          console.error("💥 Fehler beim Favorisieren:", err);
         }
       });
     } else {
