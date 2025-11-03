@@ -39,6 +39,29 @@ export class JellyfinSection extends BaseSection {
     `;
   }
 
+    // 💖 Klick-Handler für den Herz-Button hinzufügen
+    const favBtn = cardInstance.info.querySelector('.fav-btn');
+    if (favBtn) {
+      favBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+  
+        const icon = favBtn.querySelector('ha-icon');
+        const isFav = favBtn.classList.toggle('favorited');
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+  
+        if (isFav) {
+          await this.addToFavorites(cardInstance, itemId);
+          this._favoriteIds.add(itemId);
+        } else {
+          await this.removeFromFavorites(cardInstance, itemId);
+          this._favoriteIds.delete(itemId);
+        }
+  
+        console.log(`❤️ Favorit für ${item.title}:`, isFav);
+      });
+    }
+  }
+
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
     if (!item || !item.poster || !item.title) return '';
