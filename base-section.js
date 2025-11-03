@@ -78,30 +78,9 @@ export class BaseSection {
       cardInstance.config.max_items ||
       10;
 
-  // 🧠 Items direkt aus Emby laden statt aus entity.attributes.data
-  const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-  let items = [];
-  
-  try {
-    const res = await fetch(`${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Movie,Series&SortBy=DateCreated&SortOrder=Descending&api_key=${apiKey}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-  
-    items = (data.Items || []).map(i => ({
-      Id: i.Id,
-      title: i.Name,
-      poster: `${serverUrl}/Items/${i.Id}/Images/Primary?api_key=${apiKey}`,
-      rating: i.CommunityRating,
-      year: i.ProductionYear,
-      isFavorite: i.UserData?.IsFavorite,
-    }));
-  
-    console.log("📦 Emby Items geladen:", items.length, "Beispiel:", items[0]);
-  } catch (err) {
-    console.error("💥 Fehler beim Laden der Emby-Items:", err);
-  }
-  
+  let items = entity.attributes.data || [];
   items = items.slice(0, maxItems);
+
 
 
     // 🩷 Vorab Favoritenliste aus Emby laden
