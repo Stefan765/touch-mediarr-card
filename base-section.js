@@ -78,8 +78,29 @@ export class BaseSection {
       cardInstance.config.max_items ||
       10;
 
-    let items = entity.attributes.data || [];
+    let items = entity?.attributes?.data || [];
+    
+    // 🧠 Sicherstellen, dass items ein Array ist
+    if (typeof items === "string") {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        console.warn("⚠️ Konnte entity.attributes.data nicht parsen:", e, items);
+        items = [];
+      }
+    }
+    
+    if (!Array.isArray(items)) {
+      items = [items];
+    }
+    
+    // Header-Objekt (title_default) entfernen
+    if (items.length && items[0].title_default) {
+      items = items.slice(1);
+    }
+    
     items = items.slice(0, maxItems);
+
 
     // 🩷 Vorab Favoritenliste aus Emby laden
     await this.fetchFavoritesFromEmby(cardInstance);
