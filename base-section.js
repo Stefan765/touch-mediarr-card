@@ -106,6 +106,7 @@ export class BaseSection {
     listElement.querySelectorAll('.fav-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        console.log("Favoriten-Button geklickt, ID:", btn.dataset.id);
 
         const button = e.currentTarget;
         const icon = button.querySelector('ha-icon');
