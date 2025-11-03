@@ -86,8 +86,9 @@ export class BaseSection {
 
     // 🧩 Markiere Favoriten in den Items
     items.forEach((item) => {
-      const itemId = item.id || item.Id;
+      const itemId = (item.id || item.Id)?.toString();
       item.isFavorite = this._favoriteIds.has(itemId);
+
     });
 
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
@@ -222,7 +223,7 @@ export class BaseSection {
       }
   
       const data = await res.json();
-      const favorites = (data.Items || []).map(item => item.Id);
+      const favorites = (data.Items || []).map(item => item.Id?.toString());
       this._favoriteIds = new Set(favorites);
       console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
   
