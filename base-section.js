@@ -235,7 +235,7 @@ export class BaseSection {
   
     try {
       // Korrekte URL für Emby hinzufügen
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
+      const url = `${serverUrl}/emby/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
       const res = await fetch(url, { method: "POST" });
   
       if (res.ok) {
@@ -257,7 +257,7 @@ export class BaseSection {
   
     try {
       // Korrekte URL für Emby entfernen
-      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
+      const url = `${serverUrl}/emby/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
       const res = await fetch(url, { method: "DELETE" });
   
       if (res.ok) {
