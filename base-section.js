@@ -234,9 +234,9 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite?api_key=${apiKey}`, {
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "X-Emby-Token": apiKey }
         
       });
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
@@ -252,9 +252,9 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Items/${itemId}/Unfavorite?api_key=${apiKey}`, {
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Unfavorite`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "X-Emby-Token": apiKey }
         
       });
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
