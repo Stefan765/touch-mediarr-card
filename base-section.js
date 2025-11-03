@@ -234,7 +234,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/Favorite?api_key=${apiKey}`, {
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite?api_key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         
@@ -252,7 +252,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/Unfavorite?api_key=${apiKey}`, {
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Unfavorite?api_key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         
