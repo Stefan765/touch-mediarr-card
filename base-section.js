@@ -235,7 +235,9 @@ export class BaseSection {
     try {
       const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
         method: "POST",
-        headers: { "X-Emby-Token": apiKey }
+        headers: {
+          "X-Emby-Token": apiKey,
+          "Content-Type": "application/json"
       });
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
@@ -252,7 +254,9 @@ export class BaseSection {
     try {
       const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems/${itemId}/Delete`, {
         method: "POST",
-        headers: { "X-Emby-Token": apiKey }
+        headers: {
+          "X-Emby-Token": apiKey,
+          "Content-Type": "application/json"
       });
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
