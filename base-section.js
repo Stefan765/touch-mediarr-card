@@ -230,16 +230,21 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
-    if (!serverUrl || !apiKey || !itemId) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
-        method: "POST",
-        headers: { "X-Emby-Token": apiKey }
-      });
-      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
-      else console.error("❌ Fehler beim Hinzufügen:", res.status);
+      // Korrekte URL für Emby hinzufügen
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
+      const res = await fetch(url, { method: "POST" });
+  
+      if (res.ok) {
+        console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
+        this._favoriteIds.add(itemId); // lokale Liste aktualisieren
+        this.updateFavoritesUI(cardInstance, itemId, true);
+      } else {
+        console.error("❌ Fehler beim Hinzufügen:", res.status);
+      }
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
@@ -248,20 +253,35 @@ export class BaseSection {
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId || !itemId) return;
+    if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems/${itemId}/Delete`, {
-        method: "POST",
-        headers: { "X-Emby-Token": apiKey }
-      });
-      if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
-      else console.error("❌ Fehler beim Entfernen:", res.status);
+      // Korrekte URL für Emby entfernen
+      const url = `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
+      const res = await fetch(url, { method: "DELETE" });
+  
+      if (res.ok) {
+        console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
+        this._favoriteIds.delete(itemId); // lokale Liste aktualisieren
+        this.updateFavoritesUI(cardInstance, itemId, false);
+      } else {
+        console.error("❌ Fehler beim Entfernen:", res.status);
+      }
     } catch (err) {
       console.error("💥 Fehler beim Entfernen:", err);
     }
   }
   
+  // 🔄 UI nach Favoriten-Update anpassen
+  updateFavoritesUI(cardInstance, itemId, isFavorite) {
+    const btn = cardInstance.querySelector(`.fav-btn[data-id="${itemId}"]`);
+    if (!btn) return;
+  
+    btn.classList.toggle("favorited", isFavorite);
+    const icon = btn.querySelector("ha-icon");
+    if (icon) icon.setAttribute("icon", isFavorite ? "mdi:heart" : "mdi:heart-outline");
+  }
+
 
 
   
