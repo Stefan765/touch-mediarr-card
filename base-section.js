@@ -230,25 +230,31 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
-    if (!serverUrl || !apiKey || !userId) return;
+    const { emby_url: serverUrl, emby_api_key: apiKey } = cardInstance.config;
+    if (!serverUrl || !apiKey) return;
+  
+    // Füge Header mit allen X-Emby-Infos hinzu
+    const headers = {
+      "X-Emby-Client": "Emby Web",
+      "X-Emby-Device-Name": "Edge Windows",
+      "X-Emby-Device-Id": "4f45ae69-e016-431b-9308-27005faf01bf",
+      "X-Emby-Client-Version": "4.9.2.6",
+      "X-Emby-Token": apiKey
+    };
   
     try {
-      // Korrekte URL für Emby hinzufügen
-      const url = `${serverUrl}/emby/Users/${userId}/FavoriteItems/${itemId}?X-Emby-Token=${apiKey}`;
-      const res = await fetch(url, { method: "POST" });
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
+        method: "POST",
+        headers
+      });
   
-      if (res.ok) {
-        console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
-        this._favoriteIds.add(itemId); // lokale Liste aktualisieren
-        this.updateFavoritesUI(cardInstance, itemId, true);
-      } else {
-        console.error("❌ Fehler beim Hinzufügen:", res.status);
-      }
+      if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
+      else console.error("❌ Fehler beim Hinzufügen:", res.status, await res.text());
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
   }
+
   
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
