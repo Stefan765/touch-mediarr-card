@@ -215,7 +215,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
+      const url = ${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey};
       const res = await fetch(url);
       if (!res.ok) return;
 
