@@ -230,39 +230,40 @@ export class BaseSection {
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const res = await fetch(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        { method: "POST" }
-      );
+      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems?api_key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ItemIds: [itemId] }),
+      });
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Favorisieren:", err);
     }
   }
-
+  
   // 💔 Emby: Aus Favoriten entfernen
   async removeFromFavorites(cardInstance, itemId) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const res = await fetch(
-        `${serverUrl}/Users/${userId}/FavoriteItems/${itemId}?api_key=${apiKey}`,
-        { method: "DELETE" }
-      );
+      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems?api_key=${apiKey}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ItemIds: [itemId] }),
+      });
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
     } catch (err) {
       console.error("💥 Fehler beim Entfernen:", err);
     }
   }
+  
 
   // 🖼️ Zufälliges Hintergrundbild
   getRandomArtwork(items) {
