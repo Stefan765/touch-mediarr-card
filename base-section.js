@@ -238,6 +238,7 @@ export class BaseSection {
         headers: {
           "X-Emby-Token": apiKey,
           "Content-Type": "application/json"
+        }
       });
       if (res.ok) console.log(`✅ ${itemId} zu Favoriten hinzugefügt.`);
       else console.error("❌ Fehler beim Hinzufügen:", res.status);
@@ -257,6 +258,7 @@ export class BaseSection {
         headers: {
           "X-Emby-Token": apiKey,
           "Content-Type": "application/json"
+        }
       });
       if (res.ok) console.log(`🗑️ ${itemId} aus Favoriten entfernt.`);
       else console.error("❌ Fehler beim Entfernen:", res.status);
