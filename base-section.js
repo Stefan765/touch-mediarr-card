@@ -77,32 +77,68 @@ export class BaseSection {
       cardInstance.config[`${this.key}_max_items`] ||
       cardInstance.config.max_items ||
       10;
-
+  
+    // 🧠 Items aus HA-Entität
     let items = entity.attributes.data || [];
     items = items.slice(0, maxItems);
-
-    // 🩷 Vorab Favoritenliste aus Emby laden
+  
+    // 🩷 Favoriten aus Emby abrufen
     await this.fetchFavoritesFromEmby(cardInstance);
-
-    // 🧩 Markiere Favoriten in den Items
+  
+    // 🧩 Favoriten markieren
     items.forEach((item) => {
-      const itemId = item.id || item.Id;
-      item.isFavorite = this._favoriteIds.has(itemId);
+      // item.Id sollte aus HA-Item kommen und mit Emby-Favoriten abgeglichen werden
+      const itemId = item.Id?.toString();
+      item.isFavorite = itemId ? this._favoriteIds.has(itemId) : false;
     });
-
+  
     const listElement = cardInstance.querySelector(`.${this.key}-list`);
     if (!listElement) return;
-
+  
     listElement.innerHTML = items
       .map((item, index) =>
         this.generateMediaItem(item, index, cardInstance.selectedType, cardInstance.selectedIndex)
       )
       .join('');
-      console.log("🔍 Favoriten-Buttons gefunden:", listElement.querySelectorAll('.fav-btn').length);
-
-
+  
+    // 💖 Favoriten-Klicklogik
+    listElement.querySelectorAll('.fav-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const button = e.currentTarget;
+        const itemId = button.dataset.id;
+        const icon = button.querySelector('ha-icon');
+  
+        const isFav = button.classList.toggle('favorited');
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+  
+        if (isFav) {
+          await this.addToFavorites(cardInstance, itemId);
+          this._favoriteIds.add(itemId);
+        } else {
+          await this.removeFromFavorites(cardInstance, itemId);
+          this._favoriteIds.delete(itemId);
+        }
+      });
+    });
+  
+    // 🎨 Hintergrund aktualisieren
+    if (
+      cardInstance.cardBackground &&
+      (!this._lastBackgroundUpdate ||
+        Date.now() - this._lastBackgroundUpdate > 30000)
+    ) {
+      const bgImage = this.getRandomArtwork(items);
+      if (bgImage) {
+        cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
+        this._lastBackgroundUpdate = Date.now();
+      }
+    }
+  
     this.addClickHandlers(cardInstance, listElement, items);
     this.ensureStyles(cardInstance);
+  }
+
 
     // ❤️ Klicklogik für Favoriten
     listElement.querySelectorAll('.fav-btn').forEach((btn) => {
