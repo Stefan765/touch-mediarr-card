@@ -1,125 +1,110 @@
-import { BaseSection } from "./base-section.js";
+// sections/jellyfin-section.js
+import { BaseSection } from './base-section.js';
 
 export class JellyfinSection extends BaseSection {
-  constructor(key, title) {
-    super(key, title);
+  constructor() {
+    super('jellyfin', 'Emby Neueste Filme');
   }
 
-  // 🔄 Hauptupdate der Liste (lädt direkt aus Emby)
-  async update(cardInstance, entity) {
-    const maxItems =
-      cardInstance.config[`${this.key}_max_items`] ||
-      cardInstance.config.max_items ||
-      10;
+  /**
+   * 🩷 Detailbereich mit Film-Infos und Herzbutton aktualisieren
+   */
+  updateInfo(cardInstance, item) {
+    if (!item) return;
 
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
-      cardInstance.config;
+    const itemId = item.id || item.Id || '';
+    const isFavorite = this._favoriteIds.has(itemId);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
 
-    if (!serverUrl || !apiKey || !userId) {
-      console.error("❌ Emby-Konfiguration unvollständig!");
-      return;
-    }
+    const releaseYear = item.release || 'Unbekannt';
+    const runtime = item.runtime ? `${Math.round(item.runtime)} min` : '';
+    const genres = item.genres || '';
+    const rating = item.rating || '';
+    const studio = item.studio || '';
+    const summary = item.summary || 'Keine Beschreibung verfügbar.';
 
-    let items = [];
+    // 🎨 HTML für Film-Details
+    cardInstance.info.innerHTML = `
+      <div class="title">${item.title}${releaseYear ? ` (${releaseYear})` : ''}</div>
+      <div class="details">${genres}${genres && studio ? ` | ${studio}` : studio}</div>
+      <div class="metadata">
+        ${runtime ? `⏱️ ${runtime}` : ''} 
+        ${rating ? ` | ⭐ ${rating}` : ''} 
+        <button class="fav-btn ${favClass}" 
+                data-id="${itemId}" 
+                title="Favorit umschalten">
+          <ha-icon icon="${heartIcon}"></ha-icon>
+        </button>
+      </div>
+      <div class="summary">${summary}</div>
+    `;
 
-    try {
-      // 🎬 Filme & Serien aus Emby laden
-      const res = await fetch(
-        `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Movie,Series&SortBy=DateCreated&SortOrder=Descending&Limit=${maxItems}&api_key=${apiKey}`
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+    // 💖 Klick-Handler für den Herz-Button hinzufügen
+    const favBtn = cardInstance.info.querySelector('.fav-btn');
+    if (favBtn) {
+      console.log("🩷 Favoriten-Button gefunden:", item.title);
 
-      items = (data.Items || []).map((i) => ({
-        Id: i.Id,
-        title: i.Name,
-        poster: `${serverUrl}/Items/${i.Id}/Images/Primary?api_key=${apiKey}`,
-        rating: i.CommunityRating,
-        year: i.ProductionYear,
-        isFavorite: i.UserData?.IsFavorite,
-        banner: `${serverUrl}/Items/${i.Id}/Images/Banner?api_key=${apiKey}`,
-        fanart: `${serverUrl}/Items/${i.Id}/Images/Backdrop?api_key=${apiKey}`,
-      }));
-
-      console.log("📦 Emby Items geladen:", items.length);
-    } catch (err) {
-      console.error("💥 Fehler beim Laden der Emby-Items:", err);
-    }
-
-    // 🩷 Favoriten aus Emby abrufen
-    await this.fetchFavoritesFromEmby(cardInstance);
-
-    // 🧩 Favoriten markieren
-    items.forEach((item) => {
-      item.isFavorite = this._favoriteIds.has(item.Id.toString());
-    });
-
-    const listElement = cardInstance.querySelector(`.${this.key}-list`);
-    if (!listElement) {
-      console.error("❌ Kein Listenelement gefunden für:", this.key);
-      return;
-    }
-
-    // 🎨 HTML für alle Elemente generieren
-    listElement.innerHTML = items
-      .map((item, index) =>
-        this.generateMediaItem(
-          item,
-          index,
-          cardInstance.selectedType,
-          cardInstance.selectedIndex
-        )
-      )
-      .join("");
-
-    console.log(
-      "🔍 Favoriten-Buttons gefunden:",
-      listElement.querySelectorAll(".fav-btn").length
-    );
-
-    // 💖 Klicklogik für Herz-Buttons
-    listElement.querySelectorAll(".fav-btn").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
+      favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const button = e.currentTarget;
-        const itemId = button.dataset.id;
-        const icon = button.querySelector("ha-icon");
+        console.log("💥 Favoriten-Klick erkannt:", item.title);
 
-        if (!itemId) {
-          console.error("❌ Keine gültige Item-ID!");
-          return;
-        }
+        const icon = favBtn.querySelector('ha-icon');
+        const isFav = favBtn.classList.toggle('favorited');
+        icon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
 
-        const isFav = button.classList.toggle("favorited");
-        icon.setAttribute("icon", isFav ? "mdi:heart" : "mdi:heart-outline");
+        try {
+          if (isFav) {
+            await this.addToFavorites(cardInstance, itemId);
+            this._favoriteIds.add(itemId);
+          } else {
+            await this.removeFromFavorites(cardInstance, itemId);
+            this._favoriteIds.delete(itemId);
+          }
+          console.log(`❤️ Favorit für ${item.title}:`, isFav);
 
-        console.log(`💥 Favoriten-Klick erkannt: ${itemId} → Status: ${isFav}`);
-
-        if (isFav) {
-          await this.addToFavorites(cardInstance, itemId);
-          this._favoriteIds.add(itemId);
-        } else {
-          await this.removeFromFavorites(cardInstance, itemId);
-          this._favoriteIds.delete(itemId);
+          // 🩶 Optional: Synchronisiere mit der Liste
+          const listBtn = cardInstance.querySelector(`.jellyfin-list .fav-btn[data-id="${itemId}"]`);
+          if (listBtn) {
+            listBtn.classList.toggle('favorited', isFav);
+            const listIcon = listBtn.querySelector('ha-icon');
+            if (listIcon) listIcon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
+          }
+        } catch (err) {
+          console.error("❌ Fehler beim Favorisieren:", err);
         }
       });
-    });
-
-    // 🖼️ Zufälliges Hintergrundbild setzen
-    if (
-      cardInstance.cardBackground &&
-      (!this._lastBackgroundUpdate ||
-        Date.now() - this._lastBackgroundUpdate > 30000)
-    ) {
-      const bgImage = this.getRandomArtwork(items);
-      if (bgImage) {
-        cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
-        this._lastBackgroundUpdate = Date.now();
-      }
+    } else {
+      console.warn("⚠️ Kein favBtn gefunden in Info für:", item.title);
     }
+  }
 
-    // 🧠 Klicks & Styles aktivieren
-    this.addClickHandlers(cardInstance, listElement, items);
-    this.ensureStyles(cardInstance);
+  /**
+   * 🖼️ Ein einzelnes Medien-Item (mit Poster, Bewertung & Herz)
+   */
+  generateMediaItem(item, index, selectedType, selectedIndex) {
+    console.log("🎬 Item-Debug:", item);
+
+    if (!item || !item.poster || !item.title) return '';
+
+    const itemId = item.id || item.Id || '';
+    const isFavorite = this._favoriteIds.has(itemId);
+    const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
+    const favClass = isFavorite ? 'favorited' : '';
+
+    return `
+      <div class="media-item ${selectedType === this.key && index === selectedIndex ? 'selected' : ''}"
+           data-type="${this.key}"
+           data-index="${index}">
+        <img src="${item.poster}" alt="${item.title}">
+        <div class="media-item-title">${item.title}</div>
+        <div class="media-item-footer">
+          ${item.rating ? `<span class="rating">⭐ ${item.rating}</span>` : ''}
+          ${itemId ? `<button class="fav-btn ${favClass}" data-id="${item.id || item.Id}" title="Favorit umschalten">
+                        <ha-icon icon="${heartIcon}"></ha-icon>
+                      </button>` : ''}
+        </div>
+      </div>
+    `;
   }
 }
