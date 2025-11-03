@@ -233,8 +233,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey) return;
   
     try {
-      const url = `${serverUrl}/Items/${itemId}/Favorite`;
-      const res = await fetch(url, {
+      const res = await fetch(`${serverUrl}/Items/${itemId}/Favorite`, {
         method: "POST",
         headers: {
           "X-Emby-Token": apiKey,
@@ -255,8 +254,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey) return;
   
     try {
-      const url = `${serverUrl}/Items/${itemId}/Unfavorite`;
-      const res = await fetch(url, {
+      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems/${itemId}/Delete`, {
         method: "POST",
         headers: {
           "X-Emby-Token": apiKey,
