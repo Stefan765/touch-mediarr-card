@@ -13,11 +13,6 @@ export class JellyfinSection extends BaseSection {
     if (!item) return;
 
     const itemId = item.Id ?? item.id ?? item.ItemId ?? item.IdString ?? null;
-    if (!itemId) {
-      console.warn("⚠️ Kein Item-Id für Favoritenaktion gefunden:", item);
-      return;
-    }
-
     const isFavorite = this._favoriteIds.has(itemId);
     const heartIcon = isFavorite ? 'mdi:heart' : 'mdi:heart-outline';
     const favClass = isFavorite ? 'favorited' : '';
