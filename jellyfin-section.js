@@ -29,13 +29,16 @@ export class JellyfinSection extends BaseSection {
       <div class="metadata">
         ${runtime ? `⏱️ ${runtime}` : ''} 
         ${rating ? ` | ⭐ ${rating}` : ''} 
-        ${itemId ? `<button class="fav-btn ${favClass}" data-id="${itemId}" title="Zu Favoriten hinzufügen">
-                      <ha-icon icon="${heartIcon}"></ha-icon>
-                    </button>` : ''}
+        <button class="fav-btn" 
+                data-id="${item.id}" 
+                title="Zu Favoriten hinzufügen">
+          ♡
+        </button>
       </div>
       <div class="summary">${summary}</div>
     `;
   }
+
 
   generateMediaItem(item, index, selectedType, selectedIndex) {
     if (!item || !item.poster || !item.title) return '';
