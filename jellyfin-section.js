@@ -98,7 +98,7 @@ export class JellyfinSection extends BaseSection {
         <div class="media-item-title">${item.title}</div>
         <div class="media-item-footer">
           ${item.rating ? `<span class="rating">⭐ ${item.rating}</span>` : ''}
-          ${itemId ? `<button class="fav-btn ${favClass}" data-id="${itemId}" title="Favorit umschalten">
+          ${itemId ? `<button class="fav-btn ${favClass}" data-id="${item.id || item.Id}" title="Favorit umschalten">
                         <ha-icon icon="${heartIcon}"></ha-icon>
                       </button>` : ''}
         </div>
