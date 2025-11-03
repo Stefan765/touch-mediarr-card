@@ -208,29 +208,25 @@ export class BaseSection {
     }
   }
 
-  // 🧠 Favoriten abrufen (einmal pro Update)
+ // 🧠 Favoriten abrufen (einmal pro Update)
   async fetchFavoritesFromEmby(cardInstance) {
-    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
+    const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } =
+      cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-  
+
     try {
-      // User-spezifischer FavoriteItems Endpoint
-      const url = ${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey};
+      const url = `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&api_key=${apiKey}`;
       const res = await fetch(url);
-      if (!res.ok) {
-        console.warn("⚠️ Fehler beim Abrufen der Favoriten:", res.status);
-        return;
-      }
-  
+      if (!res.ok) return;
+
       const data = await res.json();
-      // data.Items enthält alle Favoriten-Items
-      const favorites = (data.Items || []).map(item => item.Id);
+      const favorites = (data.Items || []).map((item) => item.Id);
       this._favoriteIds = new Set(favorites);
       console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
     } catch (err) {
       console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
-  }
+  }   
 
   // ❤️ Emby: Zu Favoriten hinzufügen
   async addToFavorites(cardInstance, itemId) {
