@@ -252,8 +252,8 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
   
     try {
-      const res = await fetch(`${serverUrl}/Users/${userId}/UnfavoriteItems?api_key=${apiKey}`, {
-        method: "POST",
+      const res = await fetch(`${serverUrl}/Users/${userId}/FavoriteItems?api_key=${apiKey}`, {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ItemIds: [itemId] }),
       });
