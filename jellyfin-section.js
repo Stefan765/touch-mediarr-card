@@ -61,7 +61,7 @@ export class JellyfinSection extends BaseSection {
             await this.removeFromFavorites(cardInstance, itemId);
             this._favoriteIds.delete(itemId);
           }
-          console.log(`❤️ Favorit für ${item.title}:`, isFav);
+        //  console.log(`❤️ Favorit für ${item.title}:`, isFav);
 
           // 🩶 Optional: Synchronisiere mit der Liste
           const listBtn = cardInstance.querySelector(`.jellyfin-list .fav-btn[data-id="${itemId}"]`);
