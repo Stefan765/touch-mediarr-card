@@ -43,11 +43,8 @@ export class EmbyMoviesSection extends BaseSection {
     // 💖 Klick-Handler für den Herz-Button hinzufügen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
     if (favBtn) {
-    //  console.log("🩷 Favoriten-Button gefunden:", item.title);
-
       favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        console.log("💥 Favoriten-Klick erkannt:", item.title);
 
         const icon = favBtn.querySelector('ha-icon');
         const isFav = favBtn.classList.toggle('favorited');
@@ -61,10 +58,9 @@ export class EmbyMoviesSection extends BaseSection {
             await this.removeFromFavorites(cardInstance, itemId);
             this._favoriteIds.delete(itemId);
           }
-        //  console.log(`❤️ Favorit für ${item.title}:`, isFav);
 
-          // 🩶 Optional: Synchronisiere mit der Liste
-          const listBtn = cardInstance.querySelector(`.jellyfin-list .fav-btn[data-id="${itemId}"]`);
+          // 🩶 Synchronisiere mit der Liste (Fix: richtiges List-Element!)
+          const listBtn = cardInstance.querySelector(`.emby_movies-list .fav-btn[data-id="${itemId}"]`);
           if (listBtn) {
             listBtn.classList.toggle('favorited', isFav);
             const listIcon = listBtn.querySelector('ha-icon');
@@ -83,8 +79,6 @@ export class EmbyMoviesSection extends BaseSection {
    * 🖼️ Ein einzelnes Medien-Item (mit Poster, Bewertung & Herz)
    */
   generateMediaItem(item, index, selectedType, selectedIndex) {
-    console.log("🎬 Item-Debug:", item);
-
     if (!item || !item.poster || !item.title) return '';
 
     const itemId = item.id || item.Id || '';
