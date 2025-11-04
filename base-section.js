@@ -45,8 +45,8 @@ export class BaseSection {
   // 📋 Detailinfo oben
   updateInfo(cardInstance, item) {
     if (!item) return;
-
-    // 🎨 Hintergrundbild suchen
+  
+    // 🖼️ Hintergrundbild (Fallback-Reihenfolge)
     const bgImage =
       item.fanart ||
       item.banner ||
@@ -56,7 +56,7 @@ export class BaseSection {
       item.PrimaryImage ||
       item.Image ||
       null;
-    
+  
     if (bgImage) {
       if (cardInstance.background) {
         cardInstance.background.style.backgroundImage = `url('${bgImage}')`;
@@ -66,17 +66,32 @@ export class BaseSection {
         cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
       }
     }
-
-
+  
+    // 🎞️ Metadaten vorbereiten
+    const title = item.title || item.Name || "Unbekannt";
+    const release = item.release || item.year || "";
+    const genres = item.genres || item.Genres?.join(", ") || "";
+    const studio = item.studio || item.Studios?.[0]?.Name || "";
+    const rating = item.rating || item.CommunityRating || "";
+    const runtime = item.runtime || item.RunTimeMinutes ? `${item.RunTimeMinutes} min` : "";
+    const summary =
+      item.summary || item.Overview || item.Plot || "Keine Beschreibung verfügbar.";
+  
+    // 🎨 HTML für Info-Bereich
     cardInstance.info.innerHTML = `
-      <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
-      <div style="font-size: 10px; margin-top: 10px; color: yellow;">
-        <div>Banner: ${item.banner ? '✓' : '✗'} ${item.banner || ''}</div>
-        <div>Fanart: ${item.fanart ? '✓' : '✗'} ${item.fanart || ''}</div>
-        <div>Backdrop: ${item.backdrop ? '✓' : '✗'} ${item.backdrop || ''}</div>
+      <div class="info-header">
+        <div class="title">${title}${release ? ` (${release})` : ""}</div>
+        <div class="meta">
+          ${genres ? `${genres}` : ""}${genres && studio ? " | " : ""}${studio ? `${studio}` : ""}
+        </div>
+        <div class="meta">
+          ${runtime ? `⏱️ ${runtime}` : ""}${rating ? ` | ⭐ ${rating}` : ""}
+        </div>
       </div>
+      <div class="summary">${summary}</div>
     `;
   }
+
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
