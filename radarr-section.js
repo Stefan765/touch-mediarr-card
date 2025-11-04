@@ -43,7 +43,7 @@ export class RadarrSection extends BaseSection {
     // 💖 Klick-Handler für den Herz-Button hinzufügen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
     if (favBtn) {
-      console.log("🩷 Favoriten-Button (Radarr) gefunden:", item.title);
+    //  console.log("🩷 Favoriten-Button (Radarr) gefunden:", item.title);
 
       favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
