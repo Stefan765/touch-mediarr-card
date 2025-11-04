@@ -250,20 +250,45 @@ export class BaseSection {
   async fetchFavoritesFromEmby(cardInstance) {
     const { emby_url: serverUrl, emby_api_key: apiKey, emby_user_id: userId } = cardInstance.config;
     if (!serverUrl || !apiKey || !userId) return;
-
+  
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Movie,Series&Filters=IsFavorite&api_key=${apiKey}`;
+      // Abrufen der Sammlungen (Filme und Serien)
+      const url = `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=CollectionFolder&api_key=${apiKey}`;
       const res = await fetch(url);
       if (!res.ok) return;
-
+  
       const data = await res.json();
-      const favorites = (data.Items || []).map(item => item.Id);
-      this._favoriteIds = new Set(favorites);
-      console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
+      const collections = data.Items || [];
+  
+      // Über jede Sammlung iterieren und Medieninhalte abrufen
+      for (const collection of collections) {
+        if (collection.Type === "CollectionFolder") {
+          // Holt die Medieninhalte innerhalb der Sammlung
+          const collectionId = collection.Id;
+          const collectionItemsUrl = `${serverUrl}/Users/${userId}/Items/${collectionId}/Items?IncludeItemTypes=Movie,Series&api_key=${apiKey}`;
+          const collectionRes = await fetch(collectionItemsUrl);
+          if (collectionRes.ok) {
+            const collectionItemsData = await collectionRes.json();
+            const collectionItems = collectionItemsData.Items || [];
+  
+            // Hier kann der Favoritenstatus für die Elemente überprüft werden
+            collectionItems.forEach(item => {
+              item.isFavorite = item.UserData?.IsFavorite || false; // Favoritenstatus prüfen
+            });
+  
+            // Hier kannst du die Favoriten hinzufügen oder aktualisieren
+            const favorites = collectionItems.filter(item => item.isFavorite).map(item => item.Id);
+            this._favoriteIds = new Set(favorites);
+          }
+        }
+      }
+      
+      console.log(`🔄 Emby-Favoriten geladen: ${this._favoriteIds.size} Stück`);
     } catch (err) {
       console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
   }
+
 
   // ❤️ Emby: Favorit hinzufügen
   async addToFavorites(cardInstance, itemId) {
