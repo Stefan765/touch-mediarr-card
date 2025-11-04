@@ -46,17 +46,27 @@ export class BaseSection {
   updateInfo(cardInstance, item) {
     if (!item) return;
 
-    const mediaBackground = item.banner || item.fanart || item.backdrop || item.poster;
-    const cardBackground = item.fanart || item.banner || item.backdrop || item.poster;
-
-    if (mediaBackground) {
-      cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
-      cardInstance.background.style.opacity = cardInstance.config.opacity || 0.7;
+    // 🎨 Hintergrundbild suchen
+    const bgImage =
+      item.fanart ||
+      item.banner ||
+      item.backdrop ||
+      item.poster ||
+      item.BackdropImage ||
+      item.PrimaryImage ||
+      item.Image ||
+      null;
+    
+    if (bgImage) {
+      if (cardInstance.background) {
+        cardInstance.background.style.backgroundImage = `url('${bgImage}')`;
+        cardInstance.background.style.opacity = 0.7;
+      }
+      if (cardInstance.cardBackground) {
+        cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
+      }
     }
 
-    if (cardBackground && cardInstance.cardBackground) {
-      cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
-    }
 
     cardInstance.info.innerHTML = `
       <div class="title">${item.title}${item.year ? ` (${item.year})` : ''}</div>
