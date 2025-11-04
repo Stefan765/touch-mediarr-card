@@ -1,6 +1,4 @@
 export class BaseSection {
-  async addToFavorites(cardInstance, itemId) {
-export class BaseSection {
   constructor(key, title) {
     this.key = key;
     this.title = title;
