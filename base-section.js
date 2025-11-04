@@ -256,7 +256,7 @@ export class BaseSection {
       const data = await res.json();
       const favorites = (data.Items || []).map(item => item.Id);
       this._favoriteIds = new Set(favorites);
-      console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
+    //  console.log(`🔄 Emby-Favoriten geladen: ${favorites.length} Stück`);
     } catch (err) {
       console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
