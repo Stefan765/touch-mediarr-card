@@ -1,6 +1,6 @@
 // main-card.js
 import { EmbyMoviesSection } from './emby-movies-section.js';
-import { RadarrSection } from './radarr-section.js';
+import { EmbySeriesSection } from './emby-series-section.js';
 import { styles } from './styles.js';
 
 class MediarrCard extends HTMLElement {
@@ -10,10 +10,10 @@ class MediarrCard extends HTMLElement {
     this.selectedIndex = 0;
     this.collapsedSections = new Set();
 
-    // ✅ Nur emby & Radarr aktiv
+    // ✅ Nur emby aktiv
     this.sections = {
       emby_movies: new EmbyMoviesSection(),
-      radarr: new RadarrSection()
+      emby_series: new EmbySeriesSection()
     };
   }
 
@@ -36,12 +36,12 @@ class MediarrCard extends HTMLElement {
   }
 
   initializeCard(hass) {
-    // 🔍 Nur emby_movies_entity und radarr_entity berücksichtigen
+    // 🔍 Nur emby_movies_entity und emby_series_entity berücksichtigen
     const configKeys = Object.keys(this.config)
       .filter(key => key.endsWith('_entity') && this.config[key]?.length > 0)
-      .filter(key => key === 'emby_movies_entity' || key === 'radarr_entity');
+      .filter(key => key === 'emby_movies_entity' || key === 'emby_series_entity');
 
-    const orderedSections = configKeys.map(key => key.startsWith('emby_movies') ? 'emby_movies' : 'radarr');
+    const orderedSections = configKeys.map(key => key.startsWith('emby_movies') ? 'emby_movies' : 'emby_series');
 
     this.innerHTML = `
       <ha-card>
@@ -97,8 +97,8 @@ class MediarrCard extends HTMLElement {
       this.initializeCard(hass);
     }
 
-    // 🔄 Nur emby & Radarr aktualisieren
-    ['emby_movies', 'radarr'].forEach(key => {
+    // 🔄 Nur emby aktualisieren
+    ['emby_movies', 'emby_series'].forEach(key => {
       const entityId = this.config[`${key}_entity`];
       if (entityId && hass.states[entityId]) {
         this.sections[key].update(this, hass.states[entityId]);
@@ -108,10 +108,10 @@ class MediarrCard extends HTMLElement {
 
   setConfig(config) {
     const hasEntity =
-      config.emby_movies_entity || config.radarr_entity;
+      config.emby_movies_entity || config.emby_series_entity;
 
     if (!hasEntity) {
-      throw new Error('Please define at least one entity (emby_movies_entity or radarr_entity)');
+      throw new Error('Please define at least one entity (emby_movies_entity or emby_series_entity)');
     }
 
     this.config = {
@@ -120,7 +120,7 @@ class MediarrCard extends HTMLElement {
       ...config
     };
 
-    ['emby_movies', 'radarr'].forEach(section => {
+    ['emby_movies', 'emby_series'].forEach(section => {
       this.config[`${section}_max_items`] =
         this.config[`${section}_max_items`] || this.config.max_items;
     });
@@ -133,6 +133,9 @@ class MediarrCard extends HTMLElement {
     if (config.emby_movies_url && !config.emby_movies_url.endsWith('/')) {
       this._formattedEmbyMoviesUrl = config.emby_movies_url + '/';
     }
+    if (config.emby_series_url && !config.emby_series_url.endsWith('/')) {
+      this._formattedEmbySeriesUrl = config.emby_series_url + '/';
+    }
   }
 
   static getStubConfig() {
@@ -141,8 +144,8 @@ class MediarrCard extends HTMLElement {
       days_to_check: 60,
       emby_movies_entity: 'sensor.emby_movies_mediarr',
       emby_movies_label: 'Emby Movies',
-      radarr_entity: 'sensor.radarr_mediarr',
-      radarr_label: 'Upcoming Movies',
+      emby_series_entity: 'sensor.emby_series_mediarr',
+      emby_series_label: 'Emby Series',
       opacity: 0.7,
       blur_radius: 0
     };
@@ -154,7 +157,7 @@ customElements.define('emby-mediarr-card', MediarrCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "emby-mediarr-card",
-  name: "emby & Radarr Mediarr Card",
-  description: "A simplified Mediarr card for Emby only",
+  name: "Emby Movies & Series Mediarr Card",
+  description: "Simplified Mediarr card for Emby movies and series",
   preview: true
 });
