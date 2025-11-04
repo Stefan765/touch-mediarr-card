@@ -249,7 +249,7 @@ export class BaseSection {
     if (!serverUrl || !apiKey || !userId) return;
 
     try {
-      const url = `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Movie,Series&Filters=IsFavorite&api_key=${apiKey}`;
+      const url = `${serverUrl}/emby/Users/${userId}/Items?SortBy=SortName&SortOrder=Ascending&Filters=IsFavorite&IncludeItemTypes=Movie&Fields=BasicSyncInfo,PrimaryImageAspectRatio&ImageTypeLimit=1&EnableImageTypes=Primary,Backdrop&Recursive=true&api_key=${apiKey}`;
       const res = await fetch(url);
       if (!res.ok) return;
 
