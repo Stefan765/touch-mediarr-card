@@ -10,7 +10,7 @@ class MediarrCard extends HTMLElement {
     this.selectedIndex = 0;
     this.collapsedSections = new Set();
 
-    // ✅ Nur Jellyfin & Radarr aktiv
+    // ✅ Nur emby & Radarr aktiv
     this.sections = {
       emby_movies: new EmbyMoviesSection(),
       radarr: new RadarrSection()
@@ -111,7 +111,7 @@ class MediarrCard extends HTMLElement {
       config.emby_movies_entity || config.radarr_entity;
 
     if (!hasEntity) {
-      throw new Error('Please define at least one entity (jellyfin_entity or radarr_entity)');
+      throw new Error('Please define at least one entity (emby_movies_entity or radarr_entity)');
     }
 
     this.config = {
