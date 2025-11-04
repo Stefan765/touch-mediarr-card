@@ -1,9 +1,9 @@
-// sections/radarr-section.js
+// sections/emby-series-section.js
 import { BaseSection } from './base-section.js';
 
-export class RadarrSection extends BaseSection {
+export class EmbySeriesSection extends BaseSection {
   constructor() {
-    super('radarr', 'Emby Neueste Serien');
+    super('emby_series', 'Emby Neueste Serien');
   }
 
   /**
@@ -43,11 +43,8 @@ export class RadarrSection extends BaseSection {
     // 💖 Klick-Handler für den Herz-Button hinzufügen
     const favBtn = cardInstance.info.querySelector('.fav-btn');
     if (favBtn) {
-    //  console.log("🩷 Favoriten-Button (Radarr) gefunden:", item.title);
-
       favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-      //  console.log("💥 Favoriten-Klick erkannt (Radarr):", item.title);
 
         const icon = favBtn.querySelector('ha-icon');
         const isFav = favBtn.classList.toggle('favorited');
@@ -61,17 +58,16 @@ export class RadarrSection extends BaseSection {
             await this.removeFromFavorites(cardInstance, itemId);
             this._favoriteIds.delete(itemId);
           }
-          console.log(`❤️ Favorit für ${item.title}:`, isFav);
 
           // 🩶 Optional: Synchronisiere mit der Liste
-          const listBtn = cardInstance.querySelector(`.radarr-list .fav-btn[data-id="${itemId}"]`);
+          const listBtn = cardInstance.querySelector(`.emby_series-list .fav-btn[data-id="${itemId}"]`);
           if (listBtn) {
             listBtn.classList.toggle('favorited', isFav);
             const listIcon = listBtn.querySelector('ha-icon');
             if (listIcon) listIcon.setAttribute('icon', isFav ? 'mdi:heart' : 'mdi:heart-outline');
           }
         } catch (err) {
-          console.error("❌ Fehler beim Favorisieren (Radarr):", err);
+          console.error("❌ Fehler beim Favorisieren (Emby Series):", err);
         }
       });
     } else {
