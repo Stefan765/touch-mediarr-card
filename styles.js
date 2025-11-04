@@ -63,6 +63,7 @@ export const styles = `
   .media-background {
     filter: blur(var(--blur-radius, 0px));
     transform: scale(1.1);
+    opacity: 0.3;
   }
 
   /* Media Content Area */
