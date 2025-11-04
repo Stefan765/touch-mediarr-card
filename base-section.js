@@ -45,7 +45,7 @@ export class BaseSection {
   // 📋 Detailinfo oben
   updateInfo(cardInstance, item) {
     if (!item) return;
-  
+
     // 🖼️ Hintergrundbild (Fallback-Reihenfolge)
     const bgImage =
       item.fanart ||
@@ -56,7 +56,7 @@ export class BaseSection {
       item.PrimaryImage ||
       item.Image ||
       null;
-  
+
     if (bgImage) {
       if (cardInstance.background) {
         cardInstance.background.style.backgroundImage = `url('${bgImage}')`;
@@ -66,7 +66,7 @@ export class BaseSection {
         cardInstance.cardBackground.style.backgroundImage = `url('${bgImage}')`;
       }
     }
-  
+
     // 🎞️ Metadaten vorbereiten
     const title = item.title || item.Name || "Unbekannt";
     const release = item.release || item.year || "";
@@ -76,7 +76,7 @@ export class BaseSection {
     const runtime = item.runtime || item.RunTimeMinutes ? `${item.RunTimeMinutes} min` : "";
     const summary =
       item.summary || item.Overview || item.Plot || "Keine Beschreibung verfügbar.";
-  
+
     // 🎨 HTML für Info-Bereich
     cardInstance.info.innerHTML = `
       <div class="info-header">
@@ -92,14 +92,13 @@ export class BaseSection {
     `;
   }
 
-
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
     const maxItems =
       cardInstance.config[`${this.key}_max_items`] ||
       cardInstance.config.max_items ||
       10;
-  
+
     // 🧩 Fix: Wenn data ein String ist, zuerst parsen
     let items = entity.attributes.data || [];
     if (typeof items === "string") {
@@ -110,16 +109,15 @@ export class BaseSection {
         items = [];
       }
     }
-  
+
     // Sicherheitsprüfung: Muss Array sein
     if (!Array.isArray(items)) {
       console.error("❌ Ungültiges Format für items:", items);
       return;
     }
-  
+
     // Maximalanzahl begrenzen
     items = items.slice(0, maxItems);
-
 
     // 🩷 Favoriten aus Emby abrufen
     await this.fetchFavoritesFromEmby(cardInstance);
@@ -175,32 +173,32 @@ export class BaseSection {
       itemEl.onclick = () => {
         const index = parseInt(itemEl.dataset.index);
         const selectedItem = items[index];
-  
+
         cardInstance.selectedType = this.key;
         cardInstance.selectedIndex = index;
-  
+
         // 🖼️ Hintergrundbild suchen (mit Fallback)
         const mediaBackground =
           selectedItem.banner ||
           selectedItem.fanart ||
           selectedItem.backdrop ||
           selectedItem.poster;
-  
+
         const cardBackground =
           selectedItem.fanart ||
           selectedItem.banner ||
           selectedItem.backdrop ||
           selectedItem.poster;
-  
+
         if (mediaBackground)
           cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
-  
+
         if (cardBackground)
           cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
-  
+
         // 🔄 Info-Bereich aktualisieren
         this.updateInfo(cardInstance, selectedItem);
-  
+
         // 🔘 Auswahl markieren
         cardInstance.querySelectorAll('.media-item').forEach(i => {
           i.classList.toggle(
@@ -211,7 +209,6 @@ export class BaseSection {
       };
     });
   }
-
 
   // 🎨 CSS für Herzbutton
   ensureStyles(cardInstance) {
@@ -264,8 +261,6 @@ export class BaseSection {
       console.warn("⚠️ Fehler beim Abrufen der Favoriten:", err);
     }
   }
-
-
 
   // ❤️ Emby: Favorit hinzufügen
   async addToFavorites(cardInstance, itemId) {
