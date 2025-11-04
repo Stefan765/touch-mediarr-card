@@ -83,6 +83,8 @@ export class JellyfinSection extends BaseSection {
    * 🖼️ Ein einzelnes Medien-Item (mit Poster, Bewertung & Herz)
    */
   generateMediaItem(item, index, selectedType, selectedIndex) {
+    console.log("🎬 Item-Debug:", item);
+
     if (!item || !item.poster || !item.title) return '';
 
     const itemId = item.id || item.Id || '';
