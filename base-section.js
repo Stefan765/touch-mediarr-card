@@ -73,11 +73,31 @@ export class BaseSection {
 
   // 🔄 Hauptupdate der Liste
   async update(cardInstance, entity) {
-    const maxItems = cardInstance.config[`${this.key}_max_items`] || cardInstance.config.max_items || 10;
-
-    // 🧠 Items aus Home Assistant Entität
+    const maxItems =
+      cardInstance.config[`${this.key}_max_items`] ||
+      cardInstance.config.max_items ||
+      10;
+  
+    // 🧩 Fix: Wenn data ein String ist, zuerst parsen
     let items = entity.attributes.data || [];
+    if (typeof items === "string") {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        console.error("❌ Fehler beim Parsen von data:", e, items);
+        items = [];
+      }
+    }
+  
+    // Sicherheitsprüfung: Muss Array sein
+    if (!Array.isArray(items)) {
+      console.error("❌ Ungültiges Format für items:", items);
+      return;
+    }
+  
+    // Maximalanzahl begrenzen
     items = items.slice(0, maxItems);
+
 
     // 🩷 Favoriten aus Emby abrufen
     await this.fetchFavoritesFromEmby(cardInstance);
