@@ -46,8 +46,8 @@ export class BaseSection {
   updateInfo(cardInstance, item) {
     if (!item) return;
 
-    const mediaBackground = item.banner || item.fanart;
-    const cardBackground = item.fanart || item.banner;
+    const mediaBackground = item.banner || item.fanart || item.backdrop || item.poster;
+    const cardBackground = item.fanart || item.banner || item.backdrop || item.poster;
 
     if (mediaBackground) {
       cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
