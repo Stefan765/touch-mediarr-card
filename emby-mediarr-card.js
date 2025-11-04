@@ -1,5 +1,5 @@
 // main-card.js
-import { JellyfinSection } from './jellyfin-section.js';
+import { EmbyMoviesSection } from './emby-movies-section.js';
 import { RadarrSection } from './radarr-section.js';
 import { styles } from './styles.js';
 
@@ -12,7 +12,7 @@ class MediarrCard extends HTMLElement {
 
     // ✅ Nur Jellyfin & Radarr aktiv
     this.sections = {
-      jellyfin: new JellyfinSection(),
+      emby_movies: new EmbyMoviesSection(),
       radarr: new RadarrSection()
     };
   }
@@ -36,10 +36,10 @@ class MediarrCard extends HTMLElement {
   }
 
   initializeCard(hass) {
-    // 🔍 Nur jellyfin_entity und radarr_entity berücksichtigen
+    // 🔍 Nur emby_movies_entity und radarr_entity berücksichtigen
     const configKeys = Object.keys(this.config)
       .filter(key => key.endsWith('_entity') && this.config[key]?.length > 0)
-      .filter(key => key === 'jellyfin_entity' || key === 'radarr_entity');
+      .filter(key => key === 'emby_movies_entity' || key === 'radarr_entity');
 
     const orderedSections = configKeys.map(key => key.startsWith('jellyfin') ? 'jellyfin' : 'radarr');
 
@@ -97,8 +97,8 @@ class MediarrCard extends HTMLElement {
       this.initializeCard(hass);
     }
 
-    // 🔄 Nur Jellyfin & Radarr aktualisieren
-    ['jellyfin', 'radarr'].forEach(key => {
+    // 🔄 Nur emby & Radarr aktualisieren
+    ['emby_movies', 'radarr'].forEach(key => {
       const entityId = this.config[`${key}_entity`];
       if (entityId && hass.states[entityId]) {
         this.sections[key].update(this, hass.states[entityId]);
@@ -108,7 +108,7 @@ class MediarrCard extends HTMLElement {
 
   setConfig(config) {
     const hasEntity =
-      config.jellyfin_entity || config.radarr_entity;
+      config.emby_movies_entity || config.radarr_entity;
 
     if (!hasEntity) {
       throw new Error('Please define at least one entity (jellyfin_entity or radarr_entity)');
@@ -120,7 +120,7 @@ class MediarrCard extends HTMLElement {
       ...config
     };
 
-    ['jellyfin', 'radarr'].forEach(section => {
+    ['emby_movies', 'radarr'].forEach(section => {
       this.config[`${section}_max_items`] =
         this.config[`${section}_max_items`] || this.config.max_items;
     });
@@ -130,8 +130,8 @@ class MediarrCard extends HTMLElement {
         this.config[`${section}_days_to_check`] || this.config.days_to_check;
     });
 
-    if (config.jellyfin_url && !config.jellyfin_url.endsWith('/')) {
-      this._formattedJellyfinUrl = config.jellyfin_url + '/';
+    if (config.emby_movies_url && !config.emby_movies_url.endsWith('/')) {
+      this._formattedEmbyMoviesUrl = config.emby_movies_url + '/';
     }
   }
 
@@ -139,8 +139,8 @@ class MediarrCard extends HTMLElement {
     return {
       max_items: 20,
       days_to_check: 60,
-      jellyfin_entity: 'sensor.jellyfin_mediarr',
-      jellyfin_label: 'Jellyfin Media',
+      emby_movies_entity: 'sensor.emby_movies_mediarr',
+      emby_movies_label: 'Emby Movies',
       radarr_entity: 'sensor.radarr_mediarr',
       radarr_label: 'Upcoming Movies',
       opacity: 0.7,
@@ -154,7 +154,7 @@ customElements.define('emby-mediarr-card', MediarrCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "emby-mediarr-card",
-  name: "Jellyfin & Radarr Mediarr Card",
-  description: "A simplified Mediarr card for Jellyfin and Radarr only",
+  name: "emby & Radarr Mediarr Card",
+  description: "A simplified Mediarr card for Emby only",
   preview: true
 });
