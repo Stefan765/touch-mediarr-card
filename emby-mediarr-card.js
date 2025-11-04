@@ -125,7 +125,7 @@ class MediarrCard extends HTMLElement {
         this.config[`${section}_max_items`] || this.config.max_items;
     });
 
-    ['radarr'].forEach(section => {
+    ['emby_series'].forEach(section => {
       this.config[`${section}_days_to_check`] =
         this.config[`${section}_days_to_check`] || this.config.days_to_check;
     });
