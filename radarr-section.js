@@ -47,7 +47,7 @@ export class RadarrSection extends BaseSection {
 
       favBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        console.log("💥 Favoriten-Klick erkannt (Radarr):", item.title);
+      //  console.log("💥 Favoriten-Klick erkannt (Radarr):", item.title);
 
         const icon = favBtn.querySelector('ha-icon');
         const isFav = favBtn.classList.toggle('favorited');
