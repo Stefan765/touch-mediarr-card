@@ -160,24 +160,43 @@ export class BaseSection {
       itemEl.onclick = () => {
         const index = parseInt(itemEl.dataset.index);
         const selectedItem = items[index];
-
+  
         cardInstance.selectedType = this.key;
         cardInstance.selectedIndex = index;
-
-        const mediaBackground = selectedItem.banner || selectedItem.fanart;
-        const cardBackground = selectedItem.fanart || selectedItem.banner;
-
-        if (mediaBackground) cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
-        if (cardBackground) cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
-
+  
+        // 🖼️ Hintergrundbild suchen (mit Fallback)
+        const mediaBackground =
+          selectedItem.banner ||
+          selectedItem.fanart ||
+          selectedItem.backdrop ||
+          selectedItem.poster;
+  
+        const cardBackground =
+          selectedItem.fanart ||
+          selectedItem.banner ||
+          selectedItem.backdrop ||
+          selectedItem.poster;
+  
+        if (mediaBackground)
+          cardInstance.background.style.backgroundImage = `url('${mediaBackground}')`;
+  
+        if (cardBackground)
+          cardInstance.cardBackground.style.backgroundImage = `url('${cardBackground}')`;
+  
+        // 🔄 Info-Bereich aktualisieren
         this.updateInfo(cardInstance, selectedItem);
-
+  
+        // 🔘 Auswahl markieren
         cardInstance.querySelectorAll('.media-item').forEach(i => {
-          i.classList.toggle('selected', i.dataset.type === this.key && parseInt(i.dataset.index) === index);
+          i.classList.toggle(
+            'selected',
+            i.dataset.type === this.key && parseInt(i.dataset.index) === index
+          );
         });
       };
     });
   }
+
 
   // 🎨 CSS für Herzbutton
   ensureStyles(cardInstance) {
