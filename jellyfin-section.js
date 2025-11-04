@@ -1,9 +1,9 @@
-// sections/jellyfin-section.js
+// sections/emby-movies-section.js
 import { BaseSection } from './base-section.js';
 
-export class JellyfinSection extends BaseSection {
+export class EmbyMoviesSection extends BaseSection {
   constructor() {
-    super('jellyfin', 'Emby Neueste Filme');
+    super('emby_movies', 'Emby Neueste Filme');
   }
 
   /**
