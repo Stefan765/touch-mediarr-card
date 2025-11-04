@@ -41,7 +41,7 @@ class MediarrCard extends HTMLElement {
       .filter(key => key.endsWith('_entity') && this.config[key]?.length > 0)
       .filter(key => key === 'emby_movies_entity' || key === 'radarr_entity');
 
-    const orderedSections = configKeys.map(key => key.startsWith('jellyfin') ? 'jellyfin' : 'radarr');
+    const orderedSections = configKeys.map(key => key.startsWith('emby_movies') ? 'emby_movies' : 'radarr');
 
     this.innerHTML = `
       <ha-card>
