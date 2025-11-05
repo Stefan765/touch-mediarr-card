@@ -69,7 +69,7 @@ Zeigt optional ein Overlay des aktuell wiedergegebenen Mediums, falls du ein `me
 ## 🧠 Konfiguration
 
 ### Schritt 1: Installiere und konfiguriere die Sensoren
-Erforderlich: [Emby Mediarr Sensor](https://github.com/Stefan765/emby-mediarr-sensor)
+Erforderlich: (https://github.com/Stefan765/sensor.emby_upcoming_media-2.0.git)
 
 ### Schritt 2: Karte zu Lovelace hinzufügen
 
